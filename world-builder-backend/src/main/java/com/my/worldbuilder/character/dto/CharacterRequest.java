@@ -1,4 +1,4 @@
-package com.my.worldbuilder.world.dto;
+package com.my.worldbuilder.character.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -6,14 +6,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorldRequest {
-
+public class CharacterRequest {
+    
     @NotBlank
-    private String title;
+    private String name;
 
-    private String description;
+    private String summary;
 }

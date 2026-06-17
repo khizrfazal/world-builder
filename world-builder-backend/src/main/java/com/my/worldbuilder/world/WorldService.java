@@ -4,23 +4,26 @@ import com.my.worldbuilder.world.dto.WorldRequest;
 import com.my.worldbuilder.world.dto.WorldResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class WorldService {
 
     private final WorldRepository worldRepository;
     private final WorldMapper worldMapper;
 
-    public WorldResponse createWorld(WorldRequest request) {
+    @Transactional
+    public UUID createWorld(WorldRequest request) {
         World worldEntity = worldMapper.toEntity(request);
-        World saved = worldRepository.save(worldEntity);
-        return worldMapper.toResponse(saved);
+        return worldRepository.save(worldEntity).getId();
     }
 
+    @Transactional(readOnly = true)
     public List<WorldResponse> getAllWorlds() {
         return worldRepository.findAll()
                 .stream()
@@ -28,13 +31,25 @@ public class WorldService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public WorldResponse getWorldById(UUID id) {
         World world = worldRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("World not found"));
+                .orElseThrow(() -> new RuntimeException("World does not exist"));
         return worldMapper.toResponse(world);
     }
 
+    @Transactional
+    public void updateWorld(UUID id, WorldRequest request) {
+        var world = worldRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("World does not exist"));
+        worldMapper.updateEntity(world, request);
+    }
+
+    @Transactional
     public void deleteWorld(UUID id) {
-        worldRepository.deleteById(id);
+        var world = worldRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("World does not exist"));
+
+        worldRepository.delete(world);
     }
 }
