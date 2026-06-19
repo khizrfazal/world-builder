@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Builder
@@ -16,4 +17,6 @@ public class CharacterResponse {
     private UUID worldId;
     private String name;
     private String summary;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

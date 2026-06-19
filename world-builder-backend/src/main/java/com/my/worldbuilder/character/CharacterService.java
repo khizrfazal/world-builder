@@ -21,7 +21,6 @@ public class CharacterService {
     public UUID createCharacter(UUID worldId, CharacterRequest request) {
         var character = characterMapper.toEntity(request);
         character.setWorldId(worldId);
-
         return characterRepository.save(character).getId();
     }
 
