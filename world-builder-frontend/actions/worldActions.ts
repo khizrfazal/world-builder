@@ -7,8 +7,8 @@ export async function getWorlds(): Promise<World[]> {
   return wbClient.get<World[]>("/worlds");
 }
 
-export async function getWorld(worldId: string) {
-  return wbClient.get(`/worlds/${worldId}`);
+export async function getWorld(id: string): Promise<World> {
+  return wbClient.get<World>(`/worlds/${id}`);
 }
 
 export async function deleteWorld(worldId: string) {

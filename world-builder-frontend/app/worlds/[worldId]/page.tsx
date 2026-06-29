@@ -1,7 +1,8 @@
 import { getWorld } from "@/actions/worldActions";
+import { World } from "@/types/World"
 
 export default async function WorldPage({ params }) {
-  const world = await getWorld(params.worldId);
+  const world: World = await getWorld(params.worldId);
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
