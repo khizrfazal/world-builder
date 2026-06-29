@@ -6,6 +6,6 @@ export async function getWorlds() {
   return wbClient.get("/worlds");
 }
 
-export async function createWorld(data: { title: string }) {
+export async function createWorld(data: { title: string, description?: string }) {
   return wbClient.post("/worlds", data);
 }
