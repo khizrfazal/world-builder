@@ -34,10 +34,32 @@ class Client {
       cache: "no-store",
       body: body ? JSON.stringify(body) : undefined,
     });
+
+    // ❌ handle HTTP errors properly
     if (!res.ok) {
-      throw new Error(`API error: ${res.status}`);
+      const errorText = await res.text().catch(() => "");
+      throw new Error(
+        `API error: ${res.status}${errorText ? ` - ${errorText}` : ""}`
+      );
     }
-    return res.json();
+
+    // ✅ handle empty responses (DELETE / 204 No Content)
+    if (res.status === 204) {
+      return undefined as T;
+    }
+
+    // ✅ safely read response
+    const text = await res.text();
+
+    if (!text) {
+      return undefined as T;
+    }
+
+    try {
+      return JSON.parse(text) as T;
+    } catch {
+      throw new Error("Invalid JSON returned from API");
+    }
   }
 }
 

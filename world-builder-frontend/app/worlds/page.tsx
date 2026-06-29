@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import WorldCard from "@/components/WorldCard";
-import EmptyState from "@/components/EmptyState";
 import { getWorlds } from "@/actions/worldActions";
 import { World } from "@/types/World";
 
@@ -11,37 +10,46 @@ export default async function WorldsPage() {
   const worlds: World[] = await getWorlds();
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Your Worlds</h1>
-        <p className="text-gray-500">
-          Create and manage your story universes
-        </p>
-      </div>
-      {worlds.length === 0 ? (
-        <div className="space-y-2 text-gray-500">
-          <p className="text-lg font-medium text-stone-900">
-            No worlds yet
-          </p>
-          <p>
-            Create your first world to begin building your universe.
+    <div className="max-w-3xl mx-auto space-y-10">
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Your Worlds
+          </h1>
+          <p className="text-sm text-stone-500 mt-1">
+            Create and manage your story universes
           </p>
         </div>
+        <Link
+          href="/worlds/add"
+          className="bg-black text-white px-4 py-2 rounded-lg text-sm hover:bg-stone-800 transition"
+        >
+          Create world
+        </Link>
+      </div>
+      {worlds.length === 0 ? (
+        <div className="text-center py-16 border border-dashed rounded-xl bg-white">
+          <h2 className="text-lg font-semibold text-stone-900">
+            No worlds yet
+          </h2>
+          <p className="text-sm text-stone-500 mt-1">
+            Create your first world to start building your universe
+          </p>
+
+          <Link
+            href="/worlds/add"
+            className="inline-block mt-4 bg-black text-white px-4 py-2 rounded-lg text-sm"
+          >
+            Create your first world
+          </Link>
+        </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {worlds.map((w) => (
             <WorldCard key={w.id} world={w} />
           ))}
         </div>
       )}
-      <div className="pt-4">
-        <Link
-          href="/worlds/add"
-          className="inline-block bg-black text-white px-4 py-2 rounded"
-        >
-          Create World
-        </Link>
-      </div>
     </div>
   );
 }

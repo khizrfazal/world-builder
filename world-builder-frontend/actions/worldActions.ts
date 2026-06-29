@@ -7,6 +7,14 @@ export async function getWorlds(): Promise<World[]> {
   return wbClient.get<World[]>("/worlds");
 }
 
+export async function getWorld(worldId: string) {
+  return wbClient.get(`/worlds/${worldId}`);
+}
+
+export async function deleteWorld(worldId: string) {
+  return wbClient.delete(`/worlds/${worldId}`);
+}
+
 export async function createWorld(data: {
   title: string;
   description?: string;
