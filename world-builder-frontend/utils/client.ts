@@ -31,13 +31,12 @@ class Client {
       headers: {
         "Content-Type": "application/json",
       },
+      cache: "no-store",
       body: body ? JSON.stringify(body) : undefined,
     });
-
     if (!res.ok) {
       throw new Error(`API error: ${res.status}`);
     }
-
     return res.json();
   }
 }
