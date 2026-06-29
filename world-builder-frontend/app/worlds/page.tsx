@@ -5,6 +5,8 @@ import EmptyState from "@/components/EmptyState";
 import { getWorlds } from "@/actions/worldActions";
 import { World } from "@/types/World";
 
+export const dynamic = "force-dynamic";
+
 export default async function WorldsPage() {
   const worlds: World[] = await getWorlds();
 
