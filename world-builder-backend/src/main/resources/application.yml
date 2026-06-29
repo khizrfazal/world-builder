@@ -1,12 +1,10 @@
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/worldbuilder_db
-    username: postgres
-    password: postgres
-
   jpa:
     hibernate:
       ddl-auto: validate
 
   flyway:
     enabled: true
+
+  profiles:
+    active: dev   # optional default for local only
