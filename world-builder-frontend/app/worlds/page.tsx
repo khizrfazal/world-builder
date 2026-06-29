@@ -3,9 +3,10 @@ import Link from "next/link";
 import WorldCard from "@/components/WorldCard";
 import EmptyState from "@/components/EmptyState";
 import { getWorlds } from "@/actions/worldActions";
+import { World } from "@/types/World";
 
 export default async function WorldsPage() {
-  const worlds = await getWorlds();
+  const worlds: World[] = await getWorlds();
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
