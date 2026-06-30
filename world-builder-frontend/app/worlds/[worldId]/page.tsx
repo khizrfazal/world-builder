@@ -1,6 +1,5 @@
 import { getWorld, deleteWorld } from "@/actions/worldActions";
 import { getCharacters } from "@/actions/characterActions";
-import CharacterSection from "@/components/CharacterSection";
 
 import {
   Card,
@@ -32,7 +31,7 @@ export default async function WorldPage({ params }: any) {
   const { worldId } = params;
 
   const world = await getWorld(worldId);
-  const characters = await getCharacters(worldId);
+  const characters = await getCharacters(worldId); // still useful later for counts
 
   const handleDelete = async () => {
     "use server";
@@ -71,12 +70,21 @@ export default async function WorldPage({ params }: any) {
         </div>
 
         {/* ACTIONS RIGHT SIDE */}
-        <div className="flex shrink-0 flex-col gap-2">
+        <div className="flex shrink-0 gap-3">
+          {/* EDIT */}
+          <Button
+            asChild
+            variant="outline"
+            className="px-6 py-3 text-sm font-semibold"
+          >
+            <Link href={`/worlds/edit?worldId=${worldId}`}>Edit world</Link>
+          </Button>
+
           {/* DELETE */}
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button className="bg-red-600 text-white hover:bg-red-700">
-                Delete
+              <Button className="px-6 py-3 text-sm font-semibold bg-red-600 text-white hover:bg-red-700">
+                Delete world
               </Button>
             </AlertDialogTrigger>
 
@@ -97,26 +105,16 @@ export default async function WorldPage({ params }: any) {
                     type="submit"
                     className="bg-red-600 text-white hover:bg-red-700"
                   >
-                    Delete
+                    Delete world
                   </Button>
                 </form>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-
-          {/* EDIT */}
-          <Button asChild variant="outline">
-            <Link href={`/worlds/edit?worldId=${worldId}`}>Edit</Link>
-          </Button>
         </div>
       </header>
 
-      {/* CHARACTERS */}
-      <section className="space-y-4">
-        <CharacterSection worldId={worldId} characters={characters} />
-      </section>
-
-      {/* SYSTEM GRID */}
+      {/* WORLD SYSTEMS GRID ONLY (VIEW PAGE) */}
       <section className="space-y-4">
         <h2 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
           World systems
