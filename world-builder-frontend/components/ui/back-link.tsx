@@ -17,6 +17,16 @@ export function BackLink() {
     );
   }
 
+  // worlds / {worldId} / edit
+  if (segments.length === 3 && segments[2] === "edit") {
+    const worldId = segments[1];
+    return (
+      <Button asChild variant="ghost" className="mb-6 px-0">
+        <Link href={`/worlds/${worldId}`}>← Back to world</Link>
+      </Button>
+    );
+  }
+
   // worlds / {worldId} / {section}
   if (segments.length === 3) {
     const worldId = segments[1];
