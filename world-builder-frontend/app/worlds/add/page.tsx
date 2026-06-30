@@ -3,8 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createWorld } from "@/actions/worldActions";
+
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,30 +27,49 @@ export default function NewWorldPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await createWorld({
-        title,
-        description,
-      });
+      await createWorld({ title, description });
       router.push("/worlds");
     } finally {
       setLoading(false);
     }
   }
+
   return (
-    <div className="mx-auto max-w-xl">
+    <div className="space-y-10 max-w-2xl mx-auto">
+      {/* BACKLINK */}
+      <Button
+        variant="ghost"
+        onClick={() => router.push("/worlds")}
+        className="px-0"
+      >
+        ← Back to worlds
+      </Button>
+
+      {/* PAGE HEADER */}
+      <header className="space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight">Create a New World</h1>
+        <p className="text-muted-foreground text-sm">
+          Start building a universe for your stories, characters, and ideas.
+        </p>
+      </header>
+
+      {/* FORM CARD */}
       <Card>
         <CardHeader>
-          <CardTitle>Create World</CardTitle>
+          <CardTitle>World Details</CardTitle>
           <CardDescription>
-            Build a new universe for your story.
+            Give your world a name and a short description.
           </CardDescription>
         </CardHeader>
+
         <CardContent>
-          <form onSubmit={onSubmit} className="space-y-6">
+          <form
+            id="create-world-form"
+            onSubmit={onSubmit}
+            className="space-y-6"
+          >
             <div className="space-y-2">
-              <Label htmlFor="title">
-                World name
-              </Label>
+              <Label htmlFor="title">World name</Label>
               <Input
                 id="title"
                 placeholder="The Kingdom of Ash"
@@ -52,10 +78,9 @@ export default function NewWorldPage() {
                 required
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="description">
-                Description
-              </Label>
+              <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
                 placeholder="Describe your world..."
@@ -64,13 +89,17 @@ export default function NewWorldPage() {
                 rows={5}
               />
             </div>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full"
-            >
-              {loading ? "Creating..." : "Create World"}
-            </Button>
+
+            {/* BUTTON BELOW FORM, CENTERED */}
+            <div className="flex justify-center pt-4">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="bg-black text-white hover:bg-black/90 px-8 py-3 font-semibold"
+              >
+                {loading ? "Creating..." : "Create World"}
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>

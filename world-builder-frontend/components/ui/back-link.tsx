@@ -11,7 +11,7 @@ export function BackLink() {
   // worlds / {worldId}
   if (segments.length === 2) {
     return (
-      <Button asChild variant="ghost" className="mb-6">
+      <Button asChild variant="ghost" className="mb-6 px-0">
         <Link href="/worlds">← Back to all worlds</Link>
       </Button>
     );
@@ -21,7 +21,7 @@ export function BackLink() {
   if (segments.length === 3) {
     const worldId = segments[1];
     return (
-      <Button asChild variant="ghost" className="mb-6">
+      <Button asChild variant="ghost" className="mb-6 px-0">
         <Link href={`/worlds/${worldId}`}>← Back to world</Link>
       </Button>
     );
@@ -31,10 +31,12 @@ export function BackLink() {
   if (segments.length === 4) {
     const worldId = segments[1];
     const section = segments[2];
+    const sectionName = section.replace(/-/g, " ");
+
     return (
-      <Button asChild variant="ghost" className="mb-6">
+      <Button asChild variant="ghost" className="mb-6 px-0">
         <Link href={`/worlds/${worldId}/${section}`}>
-          ← Back to {section.replace("-", " ")}
+          ← Back to {sectionName}
         </Link>
       </Button>
     );
@@ -45,10 +47,12 @@ export function BackLink() {
     const worldId = segments[1];
     const section = segments[2];
     const entityId = segments[3];
+    const sectionName = section.replace(/-/g, " ");
+
     return (
-      <Button asChild variant="ghost" className="mb-6">
+      <Button asChild variant="ghost" className="mb-6 px-0">
         <Link href={`/worlds/${worldId}/${section}/${entityId}`}>
-          ← Back to {section.replace("-", " ")} details
+          ← Back to {sectionName} details
         </Link>
       </Button>
     );

@@ -15,6 +15,7 @@ export const dynamic = "force-dynamic";
 
 export default async function WorldsPage() {
   const worlds = await getWorlds();
+  const hasWorlds = worlds.length > 0;
 
   return (
     <div className="space-y-12">
@@ -27,13 +28,19 @@ export default async function WorldsPage() {
           </p>
         </div>
 
-        <Button asChild className="px-6 py-3 font-semibold">
-          <Link href="/worlds/add">Create world</Link>
-        </Button>
+        {/* ONLY SHOW WHEN WORLDS EXIST */}
+        {hasWorlds && (
+          <Button
+            asChild
+            className="px-6 py-3 font-semibold bg-black text-white hover:bg-black/90"
+          >
+            <Link href="/worlds/add">Create world</Link>
+          </Button>
+        )}
       </header>
 
       {/* EMPTY STATE */}
-      {worlds.length === 0 ? (
+      {!hasWorlds ? (
         <Card className="border-dashed">
           <CardHeader>
             <CardTitle>No worlds yet</CardTitle>
@@ -43,7 +50,11 @@ export default async function WorldsPage() {
           </CardHeader>
 
           <CardContent>
-            <Button asChild variant="outline">
+            <Button
+              asChild
+              variant="outline"
+              className="bg-black text-white hover:bg-black/90"
+            >
               <Link href="/worlds/add">Create your first world</Link>
             </Button>
           </CardContent>
