@@ -1,5 +1,6 @@
 import { getWorld, deleteWorld } from "@/actions/worldActions";
 import { getCharacters } from "@/actions/characterActions";
+import { BackLink } from "@/components/ui/back-link";
 
 import {
   Card,
@@ -31,7 +32,7 @@ export default async function WorldPage({ params }: any) {
   const { worldId } = params;
 
   const world = await getWorld(worldId);
-  const characters = await getCharacters(worldId); // still useful later for counts
+  const characters = await getCharacters(worldId);
 
   const handleDelete = async () => {
     "use server";
@@ -39,25 +40,31 @@ export default async function WorldPage({ params }: any) {
     redirect("/worlds");
   };
 
-  const systems = [
-    "Characters",
-    "Locations",
-    "Factions",
-    "Cultures",
-    "Events",
-    "Items",
-    "Creatures",
-    "Magic Systems",
-    "Lore Entries",
+  // 🟦 WORLD CONTENT (formerly nodes)
+  const contentSections = [
+    { name: "Characters", slug: "characters", description: "Create and manage characters in your world." },
+    { name: "Locations", slug: "locations", description: "Define places, regions, and landmarks." },
+    { name: "Factions", slug: "factions", description: "Organisations, kingdoms, guilds, and groups." },
+    { name: "Events", slug: "events", description: "Battles, discoveries, meetings, prophecies." },
+    { name: "Lore Entries", slug: "lore-entries", description: "Write lore, history, myths, and world notes." },
+  ];
+
+  // 🟧 WORLD RELATIONSHIPS (formerly edges)
+  const relationshipSections = [
+    { name: "Character Relationships", slug: "character-relationships", description: "Allies, rivals, family, enemies." },
+    { name: "Character Locations", slug: "character-locations", description: "Track where characters are located." },
+    { name: "Faction Locations", slug: "faction-locations", description: "See which factions control or influence places." },
+    { name: "Event Participants", slug: "event-characters", description: "Add characters involved in events." },
   ];
 
   return (
     <div className="space-y-12">
       {/* HEADER */}
+      <BackLink/>
       <header className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-3">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-            World
+            World Overview
           </p>
 
           <h1 className="text-4xl font-bold tracking-tight text-balance">
@@ -69,9 +76,8 @@ export default async function WorldPage({ params }: any) {
           </p>
         </div>
 
-        {/* ACTIONS RIGHT SIDE */}
+        {/* ACTIONS */}
         <div className="flex shrink-0 gap-3">
-          {/* EDIT */}
           <Button
             asChild
             variant="outline"
@@ -80,7 +86,6 @@ export default async function WorldPage({ params }: any) {
             <Link href={`/worlds/edit?worldId=${worldId}`}>Edit world</Link>
           </Button>
 
-          {/* DELETE */}
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button className="px-6 py-3 text-sm font-semibold bg-red-600 text-white hover:bg-red-700">
@@ -92,8 +97,8 @@ export default async function WorldPage({ params }: any) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete this world?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action is permanent. All characters, locations, and lore
-                  will be removed.
+                  This action is permanent. All characters, locations, factions,
+                  events, and lore will be removed.
                 </AlertDialogDescription>
               </AlertDialogHeader>
 
@@ -114,35 +119,55 @@ export default async function WorldPage({ params }: any) {
         </div>
       </header>
 
-      {/* WORLD SYSTEMS GRID ONLY (VIEW PAGE) */}
+      {/* 🟦 WORLD CONTENT */}
       <section className="space-y-4">
         <h2 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
-          World systems
+          World Content
         </h2>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {systems.map((section) => {
-            const slug = section.toLowerCase().replace(/ /g, "-");
+          {contentSections.map((section) => (
+            <Link key={section.slug} href={`/worlds/${worldId}/${section.slug}`}>
+              <Card className="group h-full cursor-pointer transition-all hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-md">
+                <CardHeader>
+                  <CardTitle className="text-lg">{section.name}</CardTitle>
+                  <CardDescription>{section.description}</CardDescription>
+                </CardHeader>
 
-            return (
-              <Link key={section} href={`/worlds/${worldId}/${slug}`}>
-                <Card className="group h-full cursor-pointer transition-all hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-md">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{section}</CardTitle>
-                    <CardDescription>
-                      Manage {section.toLowerCase()} in this world
-                    </CardDescription>
-                  </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground transition-colors group-hover:text-foreground">
+                    Open →
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </section>
 
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground transition-colors group-hover:text-foreground">
-                      Open →
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
+      {/* 🟧 WORLD RELATIONSHIPS */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
+          World Relationships
+        </h2>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {relationshipSections.map((section) => (
+            <Link key={section.slug} href={`/worlds/${worldId}/${section.slug}`}>
+              <Card className="group h-full cursor-pointer transition-all hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-md">
+                <CardHeader>
+                  <CardTitle className="text-lg">{section.name}</CardTitle>
+                  <CardDescription>{section.description}</CardDescription>
+                </CardHeader>
+
+                <CardContent>
+                  <p className="text-sm text-muted-foreground transition-colors group-hover:text-foreground">
+                    Open →
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
         </div>
       </section>
     </div>
