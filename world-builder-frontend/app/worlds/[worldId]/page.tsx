@@ -1,6 +1,8 @@
 import { getWorld, deleteWorld } from "@/actions/worldActions";
 import { getCharacters } from "@/actions/characterActions";
 import { BackLink } from "@/components/ui/back-link";
+import { World } from "@/types/World";
+import { Character } from "@/types/Character";
 import {
   Card,
   CardContent,
@@ -27,8 +29,8 @@ export const dynamic = "force-dynamic";
 
 export default async function WorldPage({ params }: any) {
   const { worldId } = await params;
-  const world = await wbClient.get(`/worlds/${worldId}`);
-  const characters = await wbClient.get(`/worlds/${worldId}/characters`);
+  const world: World = await wbClient.get(`/worlds/${worldId}`);
+  const characters: Character = await wbClient.get(`/worlds/${worldId}/characters`);
 
   const handleDelete = async () => {
     "use server";
