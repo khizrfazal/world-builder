@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getWorlds } from "@/actions/worldActions";
-
+import { wbClient } from "@/utils/client";
 import {
   Card,
   CardContent,
@@ -8,13 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
 import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
 export default async function WorldsPage() {
-  const worlds = await getWorlds();
+  const worlds = await wbClient.get('/worlds');
   const hasWorlds = worlds.length > 0;
 
   return (

@@ -1,7 +1,6 @@
 import { getWorld, deleteWorld } from "@/actions/worldActions";
 import { getCharacters } from "@/actions/characterActions";
 import { BackLink } from "@/components/ui/back-link";
-
 import {
   Card,
   CardContent,
@@ -9,10 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -23,16 +20,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
 import { redirect } from "next/navigation";
+import { wbClient } from "@/utils/client";
 
 export const dynamic = "force-dynamic";
 
 export default async function WorldPage({ params }: any) {
-  const { worldId } = params;
-
-  const world = await getWorld(worldId);
-  const characters = await getCharacters(worldId);
+  const { worldId } = await params;
+  const world = await wbClient.get(`/worlds/${worldId}`);
+  const characters = await wbClient.get(`/worlds/${worldId}/characters`);
 
   const handleDelete = async () => {
     "use server";
@@ -83,9 +79,8 @@ export default async function WorldPage({ params }: any) {
             variant="outline"
             className="px-6 py-3 text-sm font-semibold"
           >
-            <Link href={`/worlds/edit?worldId=${worldId}`}>Edit world</Link>
+            <Link href={`/worlds/${worldId}/edit`}>Edit world</Link>
           </Button>
-
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button className="px-6 py-3 text-sm font-semibold bg-red-600 text-white hover:bg-red-700">

@@ -63,4 +63,4 @@ class Client {
   }
 }
 
-export const wbClient = new Client(process.env.API_URL!);
+export const wbClient = new Client(process.env.NEXT_PUBLIC_API_URL!);
