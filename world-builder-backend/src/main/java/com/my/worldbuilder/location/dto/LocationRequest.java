@@ -1,7 +1,6 @@
-package com.my.worldbuilder.lore.dto;
+package com.my.worldbuilder.location.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,10 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class LoreRequest {
-
-    @NotBlank
-    private String title;
-
-    private String body;
+public class LocationRequest {
+    private String name;
+    private String description;
 }

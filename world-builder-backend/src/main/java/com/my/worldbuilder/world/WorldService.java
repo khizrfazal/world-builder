@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class WorldService {
 
@@ -23,7 +22,6 @@ public class WorldService {
         return worldRepository.save(worldEntity).getId();
     }
 
-    @Transactional(readOnly = true)
     public List<WorldResponse> getAllWorlds() {
         return worldRepository.findAll()
                 .stream()
@@ -31,7 +29,6 @@ public class WorldService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public WorldResponse getWorldById(UUID id) {
         World world = worldRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("World does not exist"));

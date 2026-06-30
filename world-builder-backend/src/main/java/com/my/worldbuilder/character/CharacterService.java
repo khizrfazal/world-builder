@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class CharacterService {
 
@@ -19,12 +18,11 @@ public class CharacterService {
 
     @Transactional
     public UUID createCharacter(UUID worldId, CharacterRequest request) {
-        var character = characterMapper.toEntity(request);
-        character.setWorldId(worldId);
-        return characterRepository.save(character).getId();
+        var characterEntity = characterMapper.toEntity(request);
+        characterEntity.setWorldId(worldId);
+        return characterRepository.save(characterEntity).getId();
     }
 
-    @Transactional(readOnly = true)
     public List<CharacterResponse> getCharactersByWorld(UUID worldId) {
         return characterRepository.findByWorldId(worldId)
                 .stream()
@@ -32,27 +30,23 @@ public class CharacterService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public CharacterResponse getCharacterById(UUID id) {
-        var character = characterRepository.findById(id)
+        var characterEntity = characterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Character does not exist"));
-
-        return characterMapper.toResponse(character);
+        return characterMapper.toResponse(characterEntity);
     }
 
     @Transactional
     public void updateCharacter(UUID id, CharacterRequest request) {
-        var character = characterRepository.findById(id)
+        var characterEntity = characterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Character does not exist"));
-
-        characterMapper.updateEntity(character, request);
+        characterMapper.updateEntity(characterEntity, request);
     }
 
     @Transactional
     public void deleteCharacter(UUID id) {
-        var character = characterRepository.findById(id)
+        var characterEntity = characterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Character does not exist"));
-
-        characterRepository.delete(character);
+        characterRepository.delete(characterEntity);
     }
 }

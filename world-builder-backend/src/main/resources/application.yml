@@ -1,10 +1,10 @@
 spring:
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
 
   flyway:
     enabled: true
 
   profiles:
-    active: dev   # optional default for local only
+    active: dev
