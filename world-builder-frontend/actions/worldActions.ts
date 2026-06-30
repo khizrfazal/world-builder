@@ -15,6 +15,16 @@ export async function deleteWorld(worldId: string) {
   return wbClient.delete(`/worlds/${worldId}`);
 }
 
+export async function updateWorld(
+  worldId: string,
+  data: {
+    title: string;
+    description?: string;
+  }
+): Promise<void> {
+  return wbClient.put(`/worlds/${worldId}`, data);
+}
+
 export async function createWorld(data: {
   title: string;
   description?: string;

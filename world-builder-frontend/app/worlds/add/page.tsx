@@ -3,59 +3,77 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createWorld } from "@/actions/worldActions";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function NewWorldPage() {
   const router = useRouter();
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function onSubmit(e) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-
     try {
-      await createWorld({ title, description });
+      await createWorld({
+        title,
+        description,
+      });
       router.push("/worlds");
     } finally {
       setLoading(false);
     }
   }
-
   return (
-    <div className="max-w-xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">
-          Create world
-        </h1>
-        <p className="text-sm text-stone-500 mt-1">
-          Build a new universe for your story
-        </p>
-      </div>
-      <form
-        onSubmit={onSubmit}
-        className="bg-white p-6 rounded-xl border space-y-4"
-      >
-        <input
-          className="w-full border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-          placeholder="World name"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-        <textarea
-          className="w-full border rounded-lg p-3 text-sm h-28 resize-none focus:outline-none focus:ring-2 focus:ring-black"
-          placeholder="Description (optional)"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <button
-          disabled={loading}
-          className="bg-black text-white px-4 py-2 rounded-lg text-sm hover:bg-stone-800 transition disabled:opacity-50"
-        >
-          {loading ? "Creating..." : "Create World"}
-        </button>
-      </form>
+    <div className="mx-auto max-w-xl">
+      <Card>
+        <CardHeader>
+          <CardTitle>Create World</CardTitle>
+          <CardDescription>
+            Build a new universe for your story.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="title">
+                World name
+              </Label>
+              <Input
+                id="title"
+                placeholder="The Kingdom of Ash"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                placeholder="Describe your world..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={5}
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full"
+            >
+              {loading ? "Creating..." : "Create World"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
