@@ -37,31 +37,60 @@ export default function CharacterSection({ worldId, characters }: any) {
         <div className="flex items-center justify-between">
           <CardTitle>Characters</CardTitle>
 
-          <Button onClick={() => setOpen(!open)} size="sm">
-            {open ? "Cancel" : "Add"}
+          {/* FIXED ADD BUTTON */}
+          <Button
+            onClick={() => setOpen(!open)}
+            variant={open ? "outline" : "default"}
+          >
+            {open ? "Cancel" : "Add Character"}
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+
+      <CardContent className="space-y-6">
+        {/* CREATE FORM */}
         {open && (
-          <form onSubmit={handleCreate} className="space-y-4">
+          <form
+            onSubmit={handleCreate}
+            className="space-y-4 border p-4 rounded-lg bg-muted/20"
+          >
             <div className="space-y-2">
               <Label>Name</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} />
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Character name"
+              />
             </div>
+
             <div className="space-y-2">
               <Label>Summary</Label>
-              <Textarea value={summary} onChange={(e) => setSummary(e.target.value)} />
+              <Textarea
+                value={summary}
+                onChange={(e) => setSummary(e.target.value)}
+                placeholder="Short description"
+              />
             </div>
-            <Button disabled={loading}>
-              {loading ? "Saving..." : "Create character"}
+
+            {/* FIXED CREATE BUTTON */}
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full"
+            >
+              {loading ? "Saving..." : "Create Character"}
             </Button>
           </form>
         )}
-        <div className="grid gap-2">
+
+        {/* CHARACTER LIST */}
+        <div className="grid gap-3">
           {characters.map((c: any) => (
-            <div key={c.id} className="p-3 rounded-lg border">
-              <p className="font-medium">{c.name}</p>
+            <div
+              key={c.id}
+              className="p-4 rounded-lg border bg-muted/30"
+            >
+              <p className="font-semibold">{c.name}</p>
               <p className="text-sm text-muted-foreground">
                 {c.summary || "No description"}
               </p>

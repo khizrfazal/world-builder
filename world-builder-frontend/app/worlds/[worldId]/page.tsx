@@ -1,4 +1,4 @@
-import { getWorld } from "@/actions/worldActions";
+import { getWorld, deleteWorld } from "@/actions/worldActions";
 import { getCharacters } from "@/actions/characterActions";
 import CharacterSection from "@/components/CharacterSection";
 
@@ -15,7 +15,6 @@ import Link from "next/link";
 
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -25,22 +24,21 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-import { deleteWorld } from "@/actions/worldActions";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function WorldPage({ params }: any) {
-  const { worldId } = await params;
+  const { worldId } = params;
 
   const world = await getWorld(worldId);
   const characters = await getCharacters(worldId);
 
-  async function handleDelete() {
+  const handleDelete = async () => {
     "use server";
     await deleteWorld(worldId);
     redirect("/worlds");
-  }
+  };
 
   const systems = [
     "Characters",
@@ -55,86 +53,100 @@ export default async function WorldPage({ params }: any) {
   ];
 
   return (
-    <div className="space-y-10">
-      <div className="flex items-start justify-between gap-6">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight">
+    <div className="space-y-12">
+      {/* HEADER */}
+      <header className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-3">
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+            World
+          </p>
+
+          <h1 className="text-4xl font-bold tracking-tight text-balance">
             {world.title}
           </h1>
-          <p className="text-zinc-500 max-w-2xl leading-relaxed">
+
+          <p className="max-w-2xl leading-relaxed text-muted-foreground text-pretty">
             {world.description || "No description yet — shape your world."}
           </p>
         </div>
-        <div className="flex gap-2">
-          <Link href={`/worlds/edit?worldId=${worldId}`}>
-            <Button variant="outline">Edit</Button>
-          </Link>
+
+        {/* ACTIONS RIGHT SIDE */}
+        <div className="flex shrink-0 flex-col gap-2">
+          {/* DELETE */}
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive">Delete</Button>
+              <Button className="bg-red-600 text-white hover:bg-red-700">
+                Delete
+              </Button>
             </AlertDialogTrigger>
+
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>
-                  Delete this world?
-                </AlertDialogTitle>
+                <AlertDialogTitle>Delete this world?</AlertDialogTitle>
                 <AlertDialogDescription>
                   This action is permanent. All characters, locations, and lore
                   will be removed.
                 </AlertDialogDescription>
               </AlertDialogHeader>
+
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
+
                 <form action={handleDelete}>
-                  <AlertDialogAction asChild>
-                    <button
-                      type="submit"
-                      className="bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded-md"
-                    >
-                      Delete
-                    </button>
-                  </AlertDialogAction>
+                  <Button
+                    type="submit"
+                    className="bg-red-600 text-white hover:bg-red-700"
+                  >
+                    Delete
+                  </Button>
                 </form>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </div>
-      </div>
-      <div className="rounded-2xl border bg-white/70 backdrop-blur shadow-sm p-6">
-        <CharacterSection
-          worldId={worldId}
-          characters={characters}
-        />
-      </div>
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {systems.map((section) => {
-          const slug = section.toLowerCase().replace(/ /g, "-");
 
-          return (
-            <Link
-              key={section}
-              href={`/worlds/${worldId}/${slug}`}
-              className="block"
-            >
-              <Card className="h-full cursor-pointer transition hover:-translate-y-0.5 hover:shadow-lg bg-white/70 backdrop-blur border-zinc-200">
-                <CardHeader>
-                  <CardTitle className="text-lg">
-                    {section}
-                  </CardTitle>
-                  <CardDescription>
-                    Manage {section.toLowerCase()} in this world
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-zinc-500">
-                    Open →
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-          );
-        })}
-      </div>
+          {/* EDIT */}
+          <Button asChild variant="outline">
+            <Link href={`/worlds/edit?worldId=${worldId}`}>Edit</Link>
+          </Button>
+        </div>
+      </header>
+
+      {/* CHARACTERS */}
+      <section className="space-y-4">
+        <CharacterSection worldId={worldId} characters={characters} />
+      </section>
+
+      {/* SYSTEM GRID */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
+          World systems
+        </h2>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {systems.map((section) => {
+            const slug = section.toLowerCase().replace(/ /g, "-");
+
+            return (
+              <Link key={section} href={`/worlds/${worldId}/${slug}`}>
+                <Card className="group h-full cursor-pointer transition-all hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-md">
+                  <CardHeader>
+                    <CardTitle className="text-lg">{section}</CardTitle>
+                    <CardDescription>
+                      Manage {section.toLowerCase()} in this world
+                    </CardDescription>
+                  </CardHeader>
+
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground transition-colors group-hover:text-foreground">
+                      Open →
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }
