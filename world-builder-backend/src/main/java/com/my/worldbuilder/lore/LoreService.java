@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class LoreService {
 
@@ -24,7 +23,6 @@ public class LoreService {
         return loreRepository.save(loreEntry).getId();
     }
 
-    @Transactional(readOnly = true)
     public List<LoreResponse> getLores(UUID worldId) {
         return loreRepository.findByWorldId(worldId)
                 .stream()
@@ -32,7 +30,6 @@ public class LoreService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public LoreResponse getLoreById(UUID id) {
         var lore = loreRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Lore entry does not exist"));

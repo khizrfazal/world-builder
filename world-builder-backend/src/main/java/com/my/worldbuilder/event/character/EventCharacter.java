@@ -1,4 +1,4 @@
-package com.my.worldbuilder.relationship;
+package com.my.worldbuilder.event.character;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,35 +20,33 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "relationships", schema = "worldbuilder")
+@Table(name = "event_characters", schema = "worldbuilder")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Relationship {
+public class EventCharacter {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "world_id", nullable = false)
+    @Column(nullable = false)
     private UUID worldId;
 
-    @Column(name = "source_character_id", nullable = false)
-    private UUID sourceCharacterId;
+    @Column(nullable = false)
+    private UUID eventId;
 
-    @Column(name = "target_character_id", nullable = false)
-    private UUID targetCharacterId;
+    @Column(nullable = false)
+    private UUID characterId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "relationship_type", nullable = false)
-    private RelationshipType relationshipType;
+    private EventCharacterRole role;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist

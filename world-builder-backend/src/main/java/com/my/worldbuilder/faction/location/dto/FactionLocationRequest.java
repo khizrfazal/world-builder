@@ -1,21 +1,20 @@
-package com.my.worldbuilder.lore.dto;
+package com.my.worldbuilder.faction.location.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class LoreRequest {
-
-    @NotBlank
-    private String title;
-
-    private String body;
+public class FactionLocationRequest {
+    private UUID factionId;
+    private UUID locationId;
+    private String role;
 }

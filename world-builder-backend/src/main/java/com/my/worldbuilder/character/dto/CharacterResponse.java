@@ -2,15 +2,13 @@ package com.my.worldbuilder.character.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Getter
 @Builder
-@Data
-@NoArgsConstructor
 @AllArgsConstructor
 public class CharacterResponse {
     private UUID id;
