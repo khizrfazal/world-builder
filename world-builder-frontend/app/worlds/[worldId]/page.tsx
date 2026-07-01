@@ -38,7 +38,6 @@ export default async function WorldPage({ params }: any) {
     redirect("/worlds");
   };
 
-  // 🟦 WORLD CONTENT (formerly nodes)
   const contentSections = [
     { name: "Characters", slug: "characters", description: "Create and manage characters in your world." },
     { name: "Locations", slug: "locations", description: "Define places, regions, and landmarks." },
@@ -47,7 +46,6 @@ export default async function WorldPage({ params }: any) {
     { name: "Lore Entries", slug: "lore-entries", description: "Write lore, history, myths, and world notes." },
   ];
 
-  // 🟧 WORLD RELATIONSHIPS (formerly edges)
   const relationshipSections = [
     { name: "Character Relationships", slug: "character-relationships", description: "Allies, rivals, family, enemies." },
     { name: "Character Locations", slug: "character-locations", description: "Track where characters are located." },
@@ -57,8 +55,9 @@ export default async function WorldPage({ params }: any) {
 
   return (
     <div className="space-y-12">
-      {/* HEADER */}
       <BackLink/>
+
+      {/* HEADER */}
       <header className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-3">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
@@ -83,9 +82,12 @@ export default async function WorldPage({ params }: any) {
           >
             <Link href={`/worlds/${worldId}/edit`}>Edit world</Link>
           </Button>
+
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button className="px-6 py-3 text-sm font-semibold bg-red-600 text-white hover:bg-red-700">
+              <Button
+                className="px-6 py-3 text-sm font-semibold bg-red-600 text-white hover:bg-red-600 cursor-pointer"
+              >
                 Delete world
               </Button>
             </AlertDialogTrigger>
@@ -105,9 +107,9 @@ export default async function WorldPage({ params }: any) {
                 <form action={handleDelete}>
                   <Button
                     type="submit"
-                    className="bg-red-600 text-white hover:bg-red-700"
+                    className="bg-red-600 text-white hover:bg-red-600 cursor-pointer"
                   >
-                    Delete world
+                    Delete
                   </Button>
                 </form>
               </AlertDialogFooter>
@@ -116,7 +118,7 @@ export default async function WorldPage({ params }: any) {
         </div>
       </header>
 
-      {/* 🟦 WORLD CONTENT */}
+      {/* WORLD CONTENT */}
       <section className="space-y-4">
         <h2 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
           World Content
@@ -142,7 +144,7 @@ export default async function WorldPage({ params }: any) {
         </div>
       </section>
 
-      {/* 🟧 WORLD RELATIONSHIPS */}
+      {/* WORLD RELATIONSHIPS */}
       <section className="space-y-4">
         <h2 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
           World Relationships
