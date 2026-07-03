@@ -1,5 +1,7 @@
 # World Builder
 
+![Worlds Overview](./screenshots/worlds-overview.png)
+
 A full‑stack application that helps writers organise the worlds, characters, lore, and relationships in their stories or novels.  
 Built with **Java (Spring Boot)**, **PostgreSQL**, **Next.js**, and **TypeScript**.
 
@@ -52,4 +54,4 @@ Built with **Java (Spring Boot)**, **PostgreSQL**, **Next.js**, and **TypeScript
 Start PostgreSQL locally using Docker Compose:
 
 ```bash
-docker compose up -d
+  docker compose up -d
