@@ -1,59 +1,131 @@
 # World Builder
 
-A full‑stack application that helps writers organise the worlds, characters, lore, and relationships in their stories or novels.  
+A full-stack application for writers to organise fictional worlds, characters, locations, factions, events, and lore.
+
 Built with **Java (Spring Boot)**, **PostgreSQL**, **Next.js**, and **TypeScript**.
 
-MVP Front-end view
-![Worlds Overview](world-builder-frontend/screenshots/murim-overview.png)
+---
 
+## Features
+
+- Create and manage worlds
+- Organise characters, locations, factions, events, and lore
+- Manage character relationships and locations
+- Assign factions to locations
+- Track event participants
+- JWT authentication with Spring Security
+- RESTful API
+- Database migrations using Flyway
+- Dockerised local development
+- Deployed frontend and backend
 
 ---
 
-## 🚀 Features
+## Architecture
 
-- Create and manage worlds, characters, locations, factions, events, and lore  
-- Define relationships between characters, factions, and events  
-- Secure backend with Spring Security (JWT authentication)  
-- Fully typed frontend using Next.js + TypeScript  
-- PostgreSQL schema managed with Flyway migrations  
-- Dockerised local development environment  
-- Deployed backend on Render and frontend on Vercel
-
----
-
-## 🛠 Tech Stack
-
-### **Backend**
-- Java 21  
-- Spring Boot  
-- Spring Security (JWT)  
-- PostgreSQL  
-- Flyway  
-- Maven  
-- Docker  
-
-### **Frontend**
-- Next.js  
-- TypeScript  
-- shadcn/ui (Radix + Tailwind components)
-- Tailwind CSS  
-- Node.js 22.21.1  
+```
+                Next.js (TypeScript)
+                        │
+                 REST API (JSON)
+                        │
+            Spring Boot (Java 21)
+                        │
+                 PostgreSQL Database
+```
 
 ---
 
-## 📦 Local Development
+## Domain Model
 
-### **Prerequisites**
-- Java 21  
-- Node.js 22.21.1  
-- Docker  
-- Maven  
+```
+World
+│
+├── Characters
+│   ├── Character Relationships
+│   └── Character Locations
+│
+├── Locations
+│
+├── Factions
+│   └── Faction Locations
+│
+├── Events
+│   └── Event Participants
+│
+└── Lore Entries
+```
 
 ---
 
-## 🗄️ Database (PostgreSQL via Docker Compose)
+## Tech Stack
 
-Start PostgreSQL locally using Docker Compose:
+### Backend
+
+- Java 21
+- Spring Boot
+- Spring Security (JWT)
+- PostgreSQL
+- Flyway
+- Maven
+- Docker
+
+### Frontend
+
+- Next.js
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Node.js 22
+
+---
+
+## Running Locally
+
+### Prerequisites
+
+- Java 21
+- Node.js 22
+- Docker
+- Maven
+
+### Database
 
 ```bash
   docker compose up -d
+```
+
+### Backend
+
+```bash
+  cd backend
+  mvn spring-boot:run
+```
+
+### Frontend
+
+```bash
+  cd frontend
+  npm install
+  npm run dev
+```
+
+---
+
+## Future Improvements
+
+- [x] Authentication
+- [x] Worlds
+- [x] Characters
+- [x] Locations
+- [x] Factions
+- [x] Events
+- [x] Lore
+- [ ] Backend integration tests
+- [ ] Frontend tests
+- [ ] Search & filtering
+- [ ] Image uploads
+- [ ] Rich text editor
+
+## Application Preview
+
+![World Overview](world-builder-frontend/screenshots/murim-overview.png)
