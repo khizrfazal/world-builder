@@ -1,9 +1,11 @@
 # World Builder
 
-![Worlds Overview](world-builder-frontend/screenshots/murim-overview.png)
-
 A full‑stack application that helps writers organise the worlds, characters, lore, and relationships in their stories or novels.  
 Built with **Java (Spring Boot)**, **PostgreSQL**, **Next.js**, and **TypeScript**.
+
+MVP Front-end view
+![Worlds Overview](world-builder-frontend/screenshots/murim-overview.png)
+
 
 ---
 
