@@ -113,7 +113,6 @@ World
 
 ## Future Improvements
 
-- [x] Authentication
 - [x] Worlds
 - [x] Characters
 - [x] Locations
@@ -121,6 +120,7 @@ World
 - [x] Events
 - [x] Lore
 - [ ] Backend integration tests
+- [ ] Authentication
 - [ ] Frontend tests
 - [ ] Search & filtering
 - [ ] Image uploads
