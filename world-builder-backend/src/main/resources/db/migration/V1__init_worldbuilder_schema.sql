@@ -7,3 +7,6 @@ CREATE TABLE worldbuilder.worlds (
     created_at TIMESTAMP,
     updated_at TIMESTAMP
 );
+
+ALTER TABLE worldbuilder.worlds
+    ALTER COLUMN id SET DEFAULT gen_random_uuid();

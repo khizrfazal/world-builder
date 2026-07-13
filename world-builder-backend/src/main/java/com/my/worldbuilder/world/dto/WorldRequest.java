@@ -14,8 +14,9 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WorldRequest {
 
-    @NotBlank
-    private String title;
+    @NotBlank(message = "Title must not be blank")
+    String title;
 
-    private String description;
+    @NotBlank(message = "Description must not be blank")
+    String description;
 }

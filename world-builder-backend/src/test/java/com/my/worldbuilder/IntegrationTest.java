@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ActiveProfiles("test")
 @Sql(
         scripts = {
-                "sql/worlds_data.sql"
+                "classpath:sql/worlds_data.sql"
         },
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public abstract class IntegrationTest {
