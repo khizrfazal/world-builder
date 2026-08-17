@@ -1,5 +1,6 @@
 package com.my.worldbuilder.world;
 
+import com.my.worldbuilder.common.exception.WorldNotFoundException;
 import com.my.worldbuilder.world.dto.WorldRequest;
 import com.my.worldbuilder.world.dto.WorldResponse;
 import lombok.RequiredArgsConstructor;
@@ -31,22 +32,21 @@ public class WorldService {
 
     public WorldResponse getWorldById(UUID id) {
         World world = worldRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("World does not exist"));
+                .orElseThrow(() -> new WorldNotFoundException(id));
         return worldMapper.toResponse(world);
     }
 
     @Transactional
     public void updateWorld(UUID id, WorldRequest request) {
         var world = worldRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("World does not exist"));
+                .orElseThrow(() -> new WorldNotFoundException(id));
         worldMapper.updateEntity(world, request);
     }
 
     @Transactional
     public void deleteWorld(UUID id) {
         var world = worldRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("World does not exist"));
-
+                .orElseThrow(() -> new WorldNotFoundException(id));
         worldRepository.delete(world);
     }
 }
