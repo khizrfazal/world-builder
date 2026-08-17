@@ -7,3 +7,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/worldbuilder_db
     username: postgres
     password: postgres
+
+  jwt:
+    secret: change-this-to-a-long-random-secret-key-for-development
+    expiration: 3600000
