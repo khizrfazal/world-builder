@@ -8,6 +8,7 @@ spring:
     username: postgres
     password: postgres
 
-  jwt:
-    secret: change-this-to-a-long-random-secret-key-for-development
-    expiration: 3600000
+jwt:
+  expiration: 3600000
+  private-key: classpath:keys/private.pem
+  public-key: classpath:keys/public.pem

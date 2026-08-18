@@ -1,10 +1,8 @@
 package com.my.worldbuilder.common.security;
 
 import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.OctetSequenceKey;
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
-import com.nimbusds.jose.proc.SecurityContext;
-import org.springframework.beans.factory.annotation.Value;
+import com.nimbusds.jose.jwk.RSAKey;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -12,48 +10,41 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 
 @Configuration
+@RequiredArgsConstructor
 public class JwtConfig {
 
-    @Value("${spring.jwt.secret}")
-    private String secret;
+    private final JwtProperties props;
+    private final PemUtils pemUtils;
 
     @Bean
-    public SecretKey jwtSecretKey() {
-        return new SecretKeySpec(
-                secret.getBytes(StandardCharsets.UTF_8),
-                "HmacSHA256"
+    public RSAPrivateKey privateKey() throws Exception {
+        return pemUtils.loadPrivateKey(props.getPrivateKey());
+    }
+
+    @Bean
+    public RSAPublicKey publicKey() throws Exception {
+        return pemUtils.loadPublicKey(props.getPublicKey());
+    }
+
+    @Bean
+    public JwtEncoder jwtEncoder(RSAPrivateKey privateKey) {
+        return new NimbusJwtEncoder((jwkSelector, context) ->
+        {
+            try {
+                return jwkSelector.select(new JWKSet(new RSAKey.Builder(publicKey()).privateKey(privateKey).build()));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
         );
     }
 
     @Bean
-    public JwtEncoder jwtEncoder(SecretKey jwtSecretKey) {
-
-        OctetSequenceKey jwk = new OctetSequenceKey.Builder(jwtSecretKey)
-                .algorithm(com.nimbusds.jose.JWSAlgorithm.HS256)
-                .keyID("jwt-key")
-                .build();
-
-        JWKSet jwkSet = new JWKSet(jwk);
-
-        ImmutableJWKSet<SecurityContext> jwkSource =
-                new ImmutableJWKSet<>(jwkSet);
-
-        NimbusJwtEncoder encoder = new NimbusJwtEncoder(jwkSource);
-
-        encoder.setJwkSelector(keys -> keys.get(0));
-
-        return encoder;
-    }
-
-    @Bean
-    public JwtDecoder jwtDecoder(SecretKey jwtSecretKey) {
-        return NimbusJwtDecoder
-                .withSecretKey(jwtSecretKey)
-                .build();
+    public JwtDecoder jwtDecoder(RSAPublicKey publicKey) {
+        return NimbusJwtDecoder.withPublicKey(publicKey).build();
     }
 }

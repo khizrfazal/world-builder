@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+
 class Client {
   private readonly baseUrl: string;
 
@@ -5,55 +7,38 @@ class Client {
     this.baseUrl = baseUrl;
   }
 
-  async get<T>(path: string): Promise<T> {
-    return this.send<T>(path, "GET");
+  private getToken(): string | null {
+    try {
+      return cookies().get("token")?.value ?? null;
+    } catch {
+      return null;
+    }
   }
 
-  async post<T>(path: string, body?: unknown): Promise<T> {
-    return this.send<T>(path, "POST", body);
-  }
+  private async send<T>(path: string, method: string, body?: unknown): Promise<T> {
+    const token = this.getToken();
 
-  async put<T>(path: string, body?: unknown): Promise<T> {
-    return this.send<T>(path, "PUT", body);
-  }
-
-  async delete<T>(path: string): Promise<T> {
-    return this.send<T>(path, "DELETE");
-  }
-
-  private async send<T>(
-    path: string,
-    method: string,
-    body?: unknown
-  ): Promise<T> {
     const res = await fetch(`${this.baseUrl}${path}`, {
       method,
       headers: {
         "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       cache: "no-store",
       body: body ? JSON.stringify(body) : undefined,
     });
 
-    // ❌ handle HTTP errors properly
     if (!res.ok) {
       const errorText = await res.text().catch(() => "");
-      throw new Error(
-        `API error: ${res.status}${errorText ? ` - ${errorText}` : ""}`
-      );
+      throw new Error(`API error: ${res.status}${errorText ? ` - ${errorText}` : ""}`);
     }
 
-    // ✅ handle empty responses (DELETE / 204 No Content)
     if (res.status === 204) {
       return undefined as T;
     }
 
-    // ✅ safely read response
     const text = await res.text();
-
-    if (!text) {
-      return undefined as T;
-    }
+    if (!text) return undefined as T;
 
     try {
       return JSON.parse(text) as T;
@@ -61,6 +46,11 @@ class Client {
       throw new Error("Invalid JSON returned from API");
     }
   }
+
+  get<T>(path: string) { return this.send<T>(path, "GET"); }
+  post<T>(path: string, body?: unknown) { return this.send<T>(path, "POST", body); }
+  put<T>(path: string, body?: unknown) { return this.send<T>(path, "PUT", body); }
+  delete<T>(path: string) { return this.send<T>(path, "DELETE"); }
 }
 
 export const wbClient = new Client(process.env.NEXT_PUBLIC_API_URL!);

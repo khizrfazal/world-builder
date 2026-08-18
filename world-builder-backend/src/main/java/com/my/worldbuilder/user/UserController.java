@@ -7,11 +7,17 @@ import com.my.worldbuilder.user.dto.RegisterUserRequest;
 import com.my.worldbuilder.user.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -34,4 +40,14 @@ public class UserController {
         String token = jwtService.generateToken(user);
         return new LoginResponse(user.getId(), user.getUsername(), token);
     }
+
+    @GetMapping("/users/me")
+    public ResponseEntity<Map<String, Object>> me(Authentication auth) {
+        Jwt jwt = (Jwt) auth.getPrincipal();
+        return ResponseEntity.ok(Map.of(
+                "username", jwt.getClaim("username")
+        ));
+    }
+
+
 }
