@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { LogoutButton } from "@/components/ui/logout-button";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,7 @@ export default async function WorldsPage() {
         </div>
 
         {/* ONLY SHOW WHEN WORLDS EXIST */}
+     <div className="flex gap-3">
         {hasWorlds && (
           <Button
             asChild
@@ -37,6 +39,8 @@ export default async function WorldsPage() {
             <Link href="/worlds/add">Create world</Link>
           </Button>
         )}
+        <LogoutButton/>
+    </div>
       </header>
 
       {/* EMPTY STATE */}

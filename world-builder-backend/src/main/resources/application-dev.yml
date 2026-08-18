@@ -7,3 +7,8 @@ spring:
     url: jdbc:postgresql://localhost:5432/worldbuilder_db
     username: postgres
     password: postgres
+
+jwt:
+  expiration: 3600000
+  private-key: classpath:keys/private.pem
+  public-key: classpath:keys/public.pem

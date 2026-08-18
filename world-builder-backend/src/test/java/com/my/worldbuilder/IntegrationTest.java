@@ -10,6 +10,7 @@ import com.my.worldbuilder.faction.location.FactionLocationRepository;
 import com.my.worldbuilder.location.LocationRepository;
 import com.my.worldbuilder.location.character.CharacterLocationRepository;
 import com.my.worldbuilder.lore.LoreRepository;
+import com.my.worldbuilder.user.UserRepository;
 import com.my.worldbuilder.world.WorldRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,7 @@ public abstract class IntegrationTest {
     @Autowired protected LocationRepository locationRepository;
     @Autowired protected CharacterLocationRepository characterLocationRepository;
     @Autowired protected LoreRepository loreRepository;
+    @Autowired protected UserRepository userRepository;
 
     protected MvcResult getRequest(String url) throws Exception {
         return mockMvc.perform(
