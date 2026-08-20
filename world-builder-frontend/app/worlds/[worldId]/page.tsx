@@ -1,5 +1,7 @@
-import { getWorld, deleteWorld } from "@/actions/worldActions";
-import { getCharacters } from "@/actions/characterActions";
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { serverClient } from "@/utils/server-client";
+import { deleteWorld } from "@/actions/worldActions";
 import { BackLink } from "@/components/ui/back-link";
 import { World } from "@/types/World";
 import { Character } from "@/types/Character";
@@ -11,7 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -23,15 +24,24 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { redirect } from "next/navigation";
-import { wbClient } from "@/utils/client";
 
 export const dynamic = "force-dynamic";
 
 export default async function WorldPage({ params }: any) {
   const { worldId } = await params;
-  const world: World = await wbClient.get(`/worlds/${worldId}`);
-  const characters: Character = await wbClient.get(`/worlds/${worldId}/characters`);
 
+  // Read token on the server
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value ?? null;
+
+  // Fetch world + characters using serverClient
+  const world: World = await serverClient.get(`/worlds/${worldId}`, token);
+  const characters: Character[] = await serverClient.get(
+    `/worlds/${worldId}/characters`,
+    token
+  );
+
+  // Server action for delete
   const handleDelete = async () => {
     "use server";
     await deleteWorld(worldId);
@@ -55,7 +65,7 @@ export default async function WorldPage({ params }: any) {
 
   return (
     <div className="space-y-12">
-      <BackLink/>
+      <BackLink />
 
       {/* HEADER */}
       <header className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
@@ -85,9 +95,7 @@ export default async function WorldPage({ params }: any) {
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button
-                className="px-6 py-3 text-sm font-semibold bg-red-600 text-white hover:bg-red-600 cursor-pointer"
-              >
+              <Button className="px-6 py-3 text-sm font-semibold bg-red-600 text-white hover:bg-red-600 cursor-pointer">
                 Delete world
               </Button>
             </AlertDialogTrigger>

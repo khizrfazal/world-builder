@@ -1,6 +1,7 @@
 import { BackLink } from "@/components/ui/back-link";
 import { Character } from "@/types/Character";
-import { wbClient } from "@/utils/client";
+import { cookies } from "next/headers";
+import { serverClient } from "@/utils/server-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,18 +13,28 @@ export const dynamic = "force-dynamic";
 export default async function EditCharacterPage({ params }: any) {
   const { worldId, characterId } = await params;
 
-  const character: Character = await wbClient.get(`/characters/${characterId}`);
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value ?? null;
+
+  const character: Character = await serverClient.get(
+    `/characters/${characterId}`,
+    token
+  );
 
   async function handleUpdate(formData: FormData) {
     "use server";
 
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value ?? null;
+
     const name = formData.get("name") as string;
     const summary = formData.get("summary") as string;
 
-    await wbClient.put(`/characters/${characterId}`, {
-      name,
-      summary,
-    });
+    await serverClient.put(
+      `/characters/${characterId}`,
+      { name, summary },
+      token
+    );
 
     redirect(`/worlds/${worldId}/characters/${characterId}`);
   }

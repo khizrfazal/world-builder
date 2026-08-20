@@ -15,7 +15,8 @@ export async function login(username: string, password: string) {
   const data = await res.json();
 
   // Store token in a cookie
-  cookies().set("token", data.token, {
+  const cookieStore = await cookies();
+  cookieStore.set("token", data.token, {
     httpOnly: true,
     secure: true,
     sameSite: "lax",
@@ -41,8 +42,10 @@ export async function signup(username: string, password: string) {
 }
 
 export async function logout() {
-  cookies().delete("token");
+  const cookieStore = await cookies();
+  cookieStore.delete("token");
 }
+
 
 export async function getCurrentUser() {
   try {

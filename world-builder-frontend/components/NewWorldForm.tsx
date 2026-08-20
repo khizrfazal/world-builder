@@ -1,35 +1,40 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
 
-export default function EditWorldForm({ world, action }) {
-  const router = useRouter();
+export default function NewWorldForm({ action }) {
   const [loading, setLoading] = useState(false);
 
-  async function onSubmit(formData) {
+  async function onSubmit(formData: FormData) {
     setLoading(true);
     await action(formData);
-    router.push(`/worlds/${world.id}`);
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Edit World</CardTitle>
-        <CardDescription>Update your world’s details.</CardDescription>
+        <CardTitle>World Details</CardTitle>
+        <CardDescription>
+          Give your world a name and a short description.
+        </CardDescription>
       </CardHeader>
 
       <CardContent>
         <form action={onSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="title">World name</Label>
-            <Input id="title" name="title" defaultValue={world.title} required />
+            <Input id="title" name="title" required />
           </div>
 
           <div className="space-y-2">
@@ -37,7 +42,7 @@ export default function EditWorldForm({ world, action }) {
             <Textarea
               id="description"
               name="description"
-              defaultValue={world.description || ""}
+              placeholder="Describe your world..."
               rows={5}
             />
           </div>
@@ -45,10 +50,10 @@ export default function EditWorldForm({ world, action }) {
           <div className="flex justify-center pt-4">
             <Button
               type="submit"
-              className="bg-black text-white hover:bg-black/90 px-8 py-3 font-semibold"
               disabled={loading}
+              className="bg-black text-white hover:bg-black/90 px-8 py-3 font-semibold"
             >
-              {loading ? "Saving..." : "Save Changes"}
+              {loading ? "Creating..." : "Create World"}
             </Button>
           </div>
         </form>

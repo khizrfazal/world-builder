@@ -1,6 +1,7 @@
 import { BackLink } from "@/components/ui/back-link";
 import { Character } from "@/types/Character";
-import { wbClient } from "@/utils/client";
+import { cookies } from "next/headers";
+import { serverClient } from "@/utils/server-client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {
@@ -20,11 +21,21 @@ export const dynamic = "force-dynamic";
 export default async function CharacterDetailPage({ params }: any) {
   const { worldId, characterId } = await params;
 
-  const character: Character = await wbClient.get(`/characters/${characterId}`);
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value ?? null;
+
+  const character: Character = await serverClient.get(
+    `/characters/${characterId}`,
+    token
+  );
 
   const handleDelete = async () => {
     "use server";
-    await wbClient.delete(`/characters/${characterId}`);
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value ?? null;
+
+    await serverClient.delete(`/characters/${characterId}`, token);
     redirect(`/worlds/${worldId}/characters`);
   };
 
@@ -32,7 +43,6 @@ export default async function CharacterDetailPage({ params }: any) {
     <div className="space-y-12">
       <BackLink />
 
-      {/* HEADER */}
       <header className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-3">
           <h1 className="text-4xl font-bold tracking-tight">
@@ -45,7 +55,6 @@ export default async function CharacterDetailPage({ params }: any) {
         </div>
 
         <div className="flex gap-3">
-          {/* EDIT BUTTON */}
           <Button
             asChild
             variant="outline"
@@ -56,13 +65,13 @@ export default async function CharacterDetailPage({ params }: any) {
             </Link>
           </Button>
 
-          {/* DELETE BUTTON */}
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button className="px-6 py-3 text-sm font-semibold bg-red-600 text-white hover:bg-red-600 cursor-pointer">
                 Delete Character
               </Button>
             </AlertDialogTrigger>
+
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete this character?</AlertDialogTitle>

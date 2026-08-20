@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { wbClient } from "@/utils/client";
+import { cookies } from "next/headers";
+import { serverClient } from "@/utils/server-client";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -11,17 +12,20 @@ export const dynamic = "force-dynamic";
 export default async function CreateCharacterPage({ params }: any) {
   const { worldId } = await params;
 
-  // SERVER ACTION
   async function handleCreate(formData: FormData) {
     "use server";
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value ?? null;
 
     const name = formData.get("name") as string;
     const summary = formData.get("summary") as string;
 
-    await wbClient.post(`/worlds/${worldId}/characters`, {
-      name,
-      summary,
-    });
+    await serverClient.post(
+      `/worlds/${worldId}/characters`,
+      { name, summary },
+      token
+    );
 
     redirect(`/worlds/${worldId}/characters`);
   }

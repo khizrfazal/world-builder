@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { getWorlds } from "@/actions/worldActions";
-import { wbClient } from "@/utils/client";
+import { cookies } from "next/headers";
+import { serverClient } from "@/utils/server-client";
 import { World } from "@/types/World";
 import {
   Card,
@@ -15,7 +15,12 @@ import { LogoutButton } from "@/components/ui/logout-button";
 export const dynamic = "force-dynamic";
 
 export default async function WorldsPage() {
-  const worlds: World[] = await wbClient.get('/worlds');
+  // Read token on the server
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value ?? null;
+
+  // Fetch worlds using serverClient
+  const worlds: World[] = await serverClient.get("/worlds", token);
   const hasWorlds = worlds.length > 0;
 
   return (
@@ -29,18 +34,17 @@ export default async function WorldsPage() {
           </p>
         </div>
 
-        {/* ONLY SHOW WHEN WORLDS EXIST */}
-     <div className="flex gap-3">
-        {hasWorlds && (
-          <Button
-            asChild
-            className="px-6 py-3 font-semibold bg-black text-white hover:bg-black/90"
-          >
-            <Link href="/worlds/add">Create world</Link>
-          </Button>
-        )}
-        <LogoutButton/>
-    </div>
+        <div className="flex gap-3">
+          {hasWorlds && (
+            <Button
+              asChild
+              className="px-6 py-3 font-semibold bg-black text-white hover:bg-black/90"
+            >
+              <Link href="/worlds/add">Create world</Link>
+            </Button>
+          )}
+          <LogoutButton />
+        </div>
       </header>
 
       {/* EMPTY STATE */}
@@ -64,9 +68,8 @@ export default async function WorldsPage() {
           </CardContent>
         </Card>
       ) : (
-        /* WORLD GRID */
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {worlds.map((world: any) => (
+          {worlds.map((world) => (
             <Link key={world.id} href={`/worlds/${world.id}`}>
               <Card className="group h-full cursor-pointer transition-all hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-md">
                 <CardHeader>
