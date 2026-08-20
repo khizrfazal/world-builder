@@ -4,12 +4,21 @@ spring:
     username: postgres
     password: postgres
 
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
+
   jpa:
     hibernate:
       ddl-auto: none
 
   flyway:
     enabled: true
+
+jwt:
+  private-key: classpath:keys/private.pem
+  public-key: classpath:keys/public.pem
 
 logging:
   level:
