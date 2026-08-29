@@ -1,8 +1,6 @@
 TRUNCATE TABLE worldbuilder.users CASCADE;
 
 INSERT INTO worldbuilder.users (id, username, password)
-VALUES (
-    '00000000-0000-0000-0000-000000000001',
-    'testuser',
-    'password'
-);
+VALUES
+    ('00000000-0000-0000-0000-000000000001', 'testuser', 'password'),
+    ('00000000-0000-0000-0000-000000000002', 'otheruser', 'password');
