@@ -1,5 +1,6 @@
 package com.my.worldbuilder.common.exception;
 
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -29,7 +30,7 @@ public class GlobalExceptionHandler {
         String message = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> error.getDefaultMessage())
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .reduce("", (a, b) -> a + b + "\n");
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message.trim());
