@@ -1,6 +1,6 @@
 TRUNCATE TABLE worldbuilder.worlds CASCADE;
 
-INSERT INTO worldbuilder.worlds (title, description, created_at, updated_at)
+INSERT INTO worldbuilder.worlds (id, title, description, user_id)
 VALUES
-    ('Murim', 'Cultivation world', NOW(), NOW()),
-    ('Eldoria', 'High fantasy realm', NOW(), NOW());
+  ('11111111-1111-1111-1111-111111111111', 'Murim', 'Cultivation world', '00000000-0000-0000-0000-000000000001'),
+  ('22222222-2222-2222-2222-222222222222', 'Eldoria', 'Fantasy world', '00000000-0000-0000-0000-000000000001');

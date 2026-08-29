@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,32 +27,40 @@ public class WorldController {
     private final WorldService worldService;
 
     @PostMapping
-    public ResponseEntity<UUID> createWorld(@Valid @RequestBody WorldRequest world) {
-        var worldId = worldService.createWorld(world);
+    public ResponseEntity<UUID> createWorld(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody WorldRequest world
+    ) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        UUID worldId = worldService.createWorld(world, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(worldId);
     }
 
     @GetMapping
-    public ResponseEntity<List<WorldResponse>> getAllWorlds() {
-        var worlds = worldService.getAllWorlds();
+    public ResponseEntity<List<WorldResponse>> getWorlds(@AuthenticationPrincipal Jwt jwt) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        var worlds = worldService.getWorldsForUser(userId);
         return ResponseEntity.ok(worlds);
     }
 
     @GetMapping("/{worldId}")
-    public ResponseEntity<WorldResponse> getWorldById(@PathVariable UUID worldId) {
-        var world = worldService.getWorldById(worldId);
+    public ResponseEntity<WorldResponse> getWorldById(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID worldId) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        var world = worldService.getWorldById(worldId, userId);
         return ResponseEntity.ok(world);
     }
 
     @PutMapping("/{worldId}")
-    public ResponseEntity<Void> updateWorld(@PathVariable UUID worldId, @Valid @RequestBody WorldRequest world) {
-        worldService.updateWorld(worldId, world);
+    public ResponseEntity<Void> updateWorld(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID worldId, @Valid @RequestBody WorldRequest world) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        worldService.updateWorld(worldId, world, userId);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{worldId}")
-    public ResponseEntity<Void> deleteWorld(@PathVariable UUID worldId) {
-        worldService.deleteWorld(worldId);
+    public ResponseEntity<Void> deleteWorld(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID worldId) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        worldService.deleteWorld(worldId, userId);
         return ResponseEntity.noContent().build();
     }
 }

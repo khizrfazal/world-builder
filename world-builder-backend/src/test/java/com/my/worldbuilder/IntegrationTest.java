@@ -3,6 +3,7 @@ package com.my.worldbuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.my.worldbuilder.character.CharacterRepository;
 import com.my.worldbuilder.character.relationship.CharacterRelationshipRepository;
+import com.my.worldbuilder.common.exception.GlobalExceptionHandler;
 import com.my.worldbuilder.event.EventRepository;
 import com.my.worldbuilder.event.character.EventCharacterRepository;
 import com.my.worldbuilder.faction.FactionRepository;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -36,6 +38,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Import(GlobalExceptionHandler.class)
 @Sql(
         scripts = {
                 "classpath:sql/users_data.sql",
