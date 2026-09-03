@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,37 +27,52 @@ public class CharacterController {
 
     @PostMapping("/worlds/{worldId}/characters")
     public ResponseEntity<UUID> createCharacter(
+            @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID worldId,
             @Valid @RequestBody CharacterRequest request
     ) {
-        var id = characterService.createCharacter(worldId, request);
+        UUID userId = UUID.fromString(jwt.getSubject());
+        var id = characterService.createCharacter(worldId, request, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(id);
     }
 
     @GetMapping("/worlds/{worldId}/characters")
     public ResponseEntity<List<CharacterResponse>> getCharactersByWorld(
+            @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID worldId
     ) {
-        return ResponseEntity.ok(characterService.getCharactersByWorld(worldId));
+        UUID userId = UUID.fromString(jwt.getSubject());
+        return ResponseEntity.ok(characterService.getCharactersByWorld(worldId, userId));
     }
 
     @GetMapping("/characters/{id}")
-    public ResponseEntity<CharacterResponse> getCharacterById(@PathVariable UUID id) {
-        return ResponseEntity.ok(characterService.getCharacterById(id));
+    public ResponseEntity<CharacterResponse> getCharacterById(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID id
+    ) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        return ResponseEntity.ok(characterService.getCharacterById(id, userId));
     }
 
     @PutMapping("/characters/{id}")
     public ResponseEntity<Void> updateCharacter(
+            @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID id,
             @Valid @RequestBody CharacterRequest request
     ) {
-        characterService.updateCharacter(id, request);
+        UUID userId = UUID.fromString(jwt.getSubject());
+        characterService.updateCharacter(id, request, userId);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/characters/{id}")
-    public ResponseEntity<Void> deleteCharacter(@PathVariable UUID id) {
-        characterService.deleteCharacter(id);
+    public ResponseEntity<Void> deleteCharacter(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID id
+    ) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        characterService.deleteCharacter(id, userId);
         return ResponseEntity.noContent().build();
     }
+
 }

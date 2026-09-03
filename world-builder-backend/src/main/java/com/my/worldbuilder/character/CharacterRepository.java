@@ -8,5 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface CharacterRepository extends JpaRepository<Character, UUID> {
-    List<Character> findByWorldId(UUID worldId);
+    List<Character> findByWorld_Id(UUID worldId);
 }
