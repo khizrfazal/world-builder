@@ -5,19 +5,22 @@ import com.my.worldbuilder.IntegrationTest;
 import com.my.worldbuilder.user.User;
 import com.my.worldbuilder.world.dto.WorldRequest;
 import com.my.worldbuilder.world.dto.WorldResponse;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class WorldControllerTest extends IntegrationTest {
 
-    private final String requestMapping = "/worlds";
+    private static final String REQUEST_MAPPING = "/worlds";
+
+    private static final UUID MURIM_ID =
+            UUID.fromString("11111111-1111-1111-1111-111111111111");
 
     @Nested
     class GetWorldsTests {
@@ -27,30 +30,45 @@ public class WorldControllerTest extends IntegrationTest {
 
             @Test
             void thenReturnOnlyOwnedWorldsWith200StatusCode() throws Exception {
-                worldRepository.save(World.builder()
-                        .title("Game of Thrones")
-                        .description("This show has a really bad ending")
-                        .user(userRepository.findByUsername("testuser").orElseThrow())
-                        .build());
-                worldRepository.save(World.builder()
-                        .title("Sonic")
-                        .description("This world was full of speed and childhood memories")
-                        .user(userRepository.findByUsername("testuser").orElseThrow())
-                        .build());
+                User testUser =
+                        userRepository.findByUsername("testuser").orElseThrow();
 
-                MvcResult mvcResult = getRequest(requestMapping);
-                assertEquals(200, mvcResult.getResponse().getStatus());
+                worldRepository.save(
+                        World.builder()
+                                .title("Game of Thrones")
+                                .description("This show has a really bad ending")
+                                .user(testUser)
+                                .build()
+                );
+
+                worldRepository.save(
+                        World.builder()
+                                .title("Sonic")
+                                .description("This world was full of speed and childhood memories")
+                                .user(testUser)
+                                .build()
+                );
+
+                MvcResult result =
+                        getRequest(REQUEST_MAPPING);
+
+                assertThat(result.getResponse().getStatus())
+                        .isEqualTo(HttpStatus.OK.value());
 
                 List<WorldResponse> body = objectMapper.readValue(
-                        mvcResult.getResponse().getContentAsString(),
+                        result.getResponse().getContentAsString(),
                         new TypeReference<>() {}
                 );
 
-                assertEquals(4, body.size());
-                assertTrue(body.stream().anyMatch(w -> w.getTitle().equals("Murim")));
-                assertTrue(body.stream().anyMatch(w -> w.getTitle().equals("Eldoria")));
-                assertTrue(body.stream().anyMatch(w -> w.getTitle().equals("Game of Thrones")));
-                assertTrue(body.stream().anyMatch(w -> w.getTitle().equals("Sonic")));
+                assertThat(body)
+                        .extracting(WorldResponse::getTitle)
+                        .containsExactlyInAnyOrder(
+                                "Murim",
+                                "Eldoria",
+                                "Game of Thrones",
+                                "Sonic"
+                        )
+                        .doesNotContain("Other World");
             }
         }
     }
@@ -61,25 +79,27 @@ public class WorldControllerTest extends IntegrationTest {
         @Nested
         class GivenValidWorldId {
 
-            private UUID worldId;
-
-            @BeforeEach
-            void beforeEach() {
-                worldId = worldRepository.findAll().getFirst().getId();
-            }
-
             @Test
             void thenReturnWorldWith200StatusCode() throws Exception {
-                MvcResult mvcResult = getRequest(requestMapping + "/" + worldId);
-                assertEquals(200, mvcResult.getResponse().getStatus());
+                MvcResult result =
+                        getRequest(REQUEST_MAPPING + "/" + MURIM_ID);
+
+                assertThat(result.getResponse().getStatus())
+                        .isEqualTo(HttpStatus.OK.value());
 
                 WorldResponse body = objectMapper.readValue(
-                        mvcResult.getResponse().getContentAsString(),
+                        result.getResponse().getContentAsString(),
                         WorldResponse.class
                 );
-                assertEquals(worldId, body.getId());
-                assertEquals("Murim", body.getTitle());
-                assertEquals("Cultivation world", body.getDescription());
+
+                assertThat(body.getId())
+                        .isEqualTo(MURIM_ID);
+
+                assertThat(body.getTitle())
+                        .isEqualTo("Murim");
+
+                assertThat(body.getDescription())
+                        .isEqualTo("Cultivation world");
             }
         }
 
@@ -88,10 +108,13 @@ public class WorldControllerTest extends IntegrationTest {
 
             @Test
             void thenReturn404StatusCode() throws Exception {
-                UUID worldId = UUID.randomUUID();
+                UUID id = UUID.randomUUID();
 
-                MvcResult mvcResult = getRequest(requestMapping + "/" + worldId);
-                assertEquals(404, mvcResult.getResponse().getStatus());
+                MvcResult result =
+                        getRequest(REQUEST_MAPPING + "/" + id);
+
+                assertThat(result.getResponse().getStatus())
+                        .isEqualTo(HttpStatus.NOT_FOUND.value());
             }
         }
 
@@ -100,16 +123,24 @@ public class WorldControllerTest extends IntegrationTest {
 
             @Test
             void thenReturn403StatusCode() throws Exception {
-                User other = userRepository.findByUsername("otheruser").orElseThrow();
+                User otherUser =
+                        userRepository.findByUsername("otheruser").orElseThrow();
 
-                World otherWorld = worldRepository.save(World.builder()
-                        .title("Forbidden World")
-                        .description("Should not be accessible")
-                        .user(other)
-                        .build());
+                World otherWorld = worldRepository.save(
+                        World.builder()
+                                .title("Forbidden World")
+                                .description("Should not be accessible")
+                                .user(otherUser)
+                                .build()
+                );
 
-                MvcResult mvcResult = getRequest(requestMapping + "/" + otherWorld.getId());
-                assertEquals(403, mvcResult.getResponse().getStatus());
+                MvcResult result =
+                        getRequest(
+                                REQUEST_MAPPING + "/" + otherWorld.getId()
+                        );
+
+                assertThat(result.getResponse().getStatus())
+                        .isEqualTo(HttpStatus.FORBIDDEN.value());
             }
         }
     }
@@ -127,20 +158,31 @@ public class WorldControllerTest extends IntegrationTest {
                         "A world full of blue people"
                 );
 
-                MvcResult mvcResult = postRequest(requestMapping, request);
-                assertEquals(201, mvcResult.getResponse().getStatus());
+                MvcResult result =
+                        postRequest(REQUEST_MAPPING, request);
+
+                assertThat(result.getResponse().getStatus())
+                        .isEqualTo(HttpStatus.CREATED.value());
 
                 UUID id = objectMapper.readValue(
-                        mvcResult.getResponse().getContentAsString(),
+                        result.getResponse().getContentAsString(),
                         UUID.class
                 );
 
-                World world = worldRepository.findById(id).orElseThrow();
-                assertEquals("Avatar", world.getTitle());
-                assertEquals("A world full of blue people", world.getDescription());
+                World world =
+                        worldRepository.findById(id).orElseThrow();
 
-                User testUser = userRepository.findByUsername("testuser").orElseThrow();
-                assertEquals(testUser.getId(), world.getUser().getId());
+                assertThat(world.getTitle())
+                        .isEqualTo("Avatar");
+
+                assertThat(world.getDescription())
+                        .isEqualTo("A world full of blue people");
+
+                User testUser =
+                        userRepository.findByUsername("testuser").orElseThrow();
+
+                assertThat(world.getUser().getId())
+                        .isEqualTo(testUser.getId());
             }
         }
 
@@ -150,15 +192,26 @@ public class WorldControllerTest extends IntegrationTest {
             @Test
             void thenReturn400WhenFieldsAreBlank() throws Exception {
                 long before = worldRepository.count();
-                WorldRequest request = new WorldRequest("", "");
-                MvcResult mvcResult = postRequest(requestMapping, request);
-                assertEquals(400, mvcResult.getResponse().getStatus());
-                String response = mvcResult.getResponse().getContentAsString();
-                assertTrue(response.contains("Title must not be blank"));
-                assertTrue(response.contains("Description must not be blank"));
-                assertEquals(before, worldRepository.count());
-            }
 
+                WorldRequest request =
+                        new WorldRequest("", "");
+
+                MvcResult result =
+                        postRequest(REQUEST_MAPPING, request);
+
+                assertThat(result.getResponse().getStatus())
+                        .isEqualTo(HttpStatus.BAD_REQUEST.value());
+
+                String response =
+                        result.getResponse().getContentAsString();
+
+                assertThat(response)
+                        .contains("Title must not be blank")
+                        .contains("Description must not be blank");
+
+                assertThat(worldRepository.count())
+                        .isEqualTo(before);
+            }
         }
     }
 
@@ -170,18 +223,25 @@ public class WorldControllerTest extends IntegrationTest {
 
             @Test
             void thenUpdateWorldAndReturn204StatusCode() throws Exception {
-                UUID id = worldRepository.findAll().getFirst().getId();
                 WorldRequest request = new WorldRequest(
                         "Updated Title",
                         "Updated Description"
                 );
 
-                MvcResult mvcResult = putRequest(requestMapping + "/" + id, request);
-                assertEquals(204, mvcResult.getResponse().getStatus());
+                MvcResult result =
+                        putRequest(REQUEST_MAPPING + "/" + MURIM_ID, request);
 
-                World updated = worldRepository.findById(id).orElseThrow();
-                assertEquals("Updated Title", updated.getTitle());
-                assertEquals("Updated Description", updated.getDescription());
+                assertThat(result.getResponse().getStatus())
+                        .isEqualTo(HttpStatus.NO_CONTENT.value());
+
+                World updated =
+                        worldRepository.findById(MURIM_ID).orElseThrow();
+
+                assertThat(updated.getTitle())
+                        .isEqualTo("Updated Title");
+
+                assertThat(updated.getDescription())
+                        .isEqualTo("Updated Description");
             }
         }
 
@@ -189,16 +249,30 @@ public class WorldControllerTest extends IntegrationTest {
         class GivenInvalidRequestBody {
 
             @Test
-            void thenReturn400WhenFieldsAreBlank() throws Exception {
-                long before = worldRepository.count();
-                UUID id = worldRepository.findAll().getFirst().getId();
-                WorldRequest request = new WorldRequest("", "");
-                MvcResult mvcResult = putRequest(requestMapping + "/" + id, request);
-                assertEquals(400, mvcResult.getResponse().getStatus());
-                String response = mvcResult.getResponse().getContentAsString();
-                assertTrue(response.contains("Title must not be blank"));
-                assertTrue(response.contains("Description must not be blank"));
-                assertEquals(before, worldRepository.count());
+            void thenReturn400AndDoNotModifyWorld() throws Exception {
+                World before =
+                        worldRepository.findById(MURIM_ID).orElseThrow();
+
+                String originalTitle = before.getTitle();
+                String originalDescription = before.getDescription();
+
+                WorldRequest request =
+                        new WorldRequest("", "");
+
+                MvcResult result =
+                        putRequest(REQUEST_MAPPING + "/" + MURIM_ID, request);
+
+                assertThat(result.getResponse().getStatus())
+                        .isEqualTo(HttpStatus.BAD_REQUEST.value());
+
+                World after =
+                        worldRepository.findById(MURIM_ID).orElseThrow();
+
+                assertThat(after.getTitle())
+                        .isEqualTo(originalTitle);
+
+                assertThat(after.getDescription())
+                        .isEqualTo(originalDescription);
             }
         }
 
@@ -208,13 +282,17 @@ public class WorldControllerTest extends IntegrationTest {
             @Test
             void thenReturn404StatusCode() throws Exception {
                 UUID id = UUID.randomUUID();
+
                 WorldRequest request = new WorldRequest(
                         "Updated Title",
                         "Updated Description"
                 );
 
-                MvcResult mvcResult = putRequest(requestMapping + "/" + id, request);
-                assertEquals(404, mvcResult.getResponse().getStatus());
+                MvcResult result =
+                        putRequest(REQUEST_MAPPING + "/" + id, request);
+
+                assertThat(result.getResponse().getStatus())
+                        .isEqualTo(HttpStatus.NOT_FOUND.value());
             }
         }
 
@@ -222,19 +300,38 @@ public class WorldControllerTest extends IntegrationTest {
         class GivenWorldOwnedByAnotherUser {
 
             @Test
-            void thenReturn403StatusCode() throws Exception {
-                User other = userRepository.findByUsername("otheruser").orElseThrow();
+            void thenReturn403AndDoNotModifyWorld() throws Exception {
+                User otherUser =
+                        userRepository.findByUsername("otheruser").orElseThrow();
 
-                World otherWorld = worldRepository.save(World.builder()
-                        .title("Forbidden Update")
-                        .description("Should not be updated")
-                        .user(other)
-                        .build());
+                World otherWorld = worldRepository.save(
+                        World.builder()
+                                .title("Original Title")
+                                .description("Original Description")
+                                .user(otherUser)
+                                .build()
+                );
 
-                WorldRequest request = new WorldRequest("New Title", "New Desc");
+                WorldRequest request =
+                        new WorldRequest("New Title", "New Description");
 
-                MvcResult mvcResult = putRequest(requestMapping + "/" + otherWorld.getId(), request);
-                assertEquals(403, mvcResult.getResponse().getStatus());
+                MvcResult result =
+                        putRequest(
+                                REQUEST_MAPPING + "/" + otherWorld.getId(),
+                                request
+                        );
+
+                assertThat(result.getResponse().getStatus())
+                        .isEqualTo(HttpStatus.FORBIDDEN.value());
+
+                World unchanged =
+                        worldRepository.findById(otherWorld.getId()).orElseThrow();
+
+                assertThat(unchanged.getTitle())
+                        .isEqualTo("Original Title");
+
+                assertThat(unchanged.getDescription())
+                        .isEqualTo("Original Description");
             }
         }
     }
@@ -247,11 +344,25 @@ public class WorldControllerTest extends IntegrationTest {
 
             @Test
             void thenDeleteWorldAndReturn204StatusCode() throws Exception {
-                UUID id = worldRepository.findAll().getFirst().getId();
+                User testUser =
+                        userRepository.findByUsername("testuser").orElseThrow();
 
-                MvcResult mvcResult = deleteRequest(requestMapping + "/" + id);
-                assertEquals(204, mvcResult.getResponse().getStatus());
-                assertFalse(worldRepository.findById(id).isPresent());
+                World world = worldRepository.save(
+                        World.builder()
+                                .title("World To Delete")
+                                .description("Should be deleted")
+                                .user(testUser)
+                                .build()
+                );
+
+                MvcResult result =
+                        deleteRequest(REQUEST_MAPPING + "/" + world.getId());
+
+                assertThat(result.getResponse().getStatus())
+                        .isEqualTo(HttpStatus.NO_CONTENT.value());
+
+                assertThat(worldRepository.findById(world.getId()))
+                        .isEmpty();
             }
         }
 
@@ -262,8 +373,11 @@ public class WorldControllerTest extends IntegrationTest {
             void thenReturn404StatusCode() throws Exception {
                 UUID id = UUID.randomUUID();
 
-                MvcResult mvcResult = deleteRequest(requestMapping + "/" + id);
-                assertEquals(404, mvcResult.getResponse().getStatus());
+                MvcResult result =
+                        deleteRequest(REQUEST_MAPPING + "/" + id);
+
+                assertThat(result.getResponse().getStatus())
+                        .isEqualTo(HttpStatus.NOT_FOUND.value());
             }
         }
 
@@ -271,17 +385,29 @@ public class WorldControllerTest extends IntegrationTest {
         class GivenWorldOwnedByAnotherUser {
 
             @Test
-            void thenReturn403StatusCode() throws Exception {
-                User other = userRepository.findByUsername("otheruser").orElseThrow();
+            void thenReturn403AndDoNotDeleteWorld() throws Exception {
+                User otherUser =
+                        userRepository.findByUsername("otheruser").orElseThrow();
 
-                World otherWorld = worldRepository.save(World.builder()
-                        .title("Forbidden Delete")
-                        .description("Should not be deleted")
-                        .user(other)
-                        .build());
+                World otherWorld = worldRepository.save(
+                        World.builder()
+                                .title("Forbidden Delete World")
+                                .description("Should not be deleted")
+                                .user(otherUser)
+                                .build()
+                );
 
-                MvcResult mvcResult = deleteRequest(requestMapping + "/" + otherWorld.getId());
-                assertEquals(403, mvcResult.getResponse().getStatus());
+                MvcResult result =
+                        deleteRequest(
+                                REQUEST_MAPPING + "/" + otherWorld.getId()
+                        );
+
+                assertThat(result.getResponse().getStatus())
+                        .isEqualTo(HttpStatus.FORBIDDEN.value());
+
+                assertThat(
+                        worldRepository.findById(otherWorld.getId())
+                ).isPresent();
             }
         }
     }

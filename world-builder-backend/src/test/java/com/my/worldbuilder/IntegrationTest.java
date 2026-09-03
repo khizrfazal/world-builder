@@ -2,20 +2,11 @@ package com.my.worldbuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.my.worldbuilder.character.CharacterRepository;
-import com.my.worldbuilder.character.relationship.CharacterRelationshipRepository;
 import com.my.worldbuilder.common.exception.GlobalExceptionHandler;
-import com.my.worldbuilder.event.EventRepository;
-import com.my.worldbuilder.event.character.EventCharacterRepository;
-import com.my.worldbuilder.faction.FactionRepository;
-import com.my.worldbuilder.faction.location.FactionLocationRepository;
-import com.my.worldbuilder.location.LocationRepository;
-import com.my.worldbuilder.location.character.CharacterLocationRepository;
-import com.my.worldbuilder.lore.LoreRepository;
 import com.my.worldbuilder.user.User;
 import com.my.worldbuilder.user.UserRepository;
 import com.my.worldbuilder.world.WorldRepository;
 import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -42,97 +34,111 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @Sql(
         scripts = {
                 "classpath:sql/users_data.sql",
-                "classpath:sql/worlds_data.sql"
+                "classpath:sql/worlds_data.sql",
+                "classpath:sql/characters_data.sql"
         },
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
 public abstract class IntegrationTest {
 
-    @Autowired protected EntityManager entityManager;
-    @Autowired protected MockMvc mockMvc;
-    @Autowired protected ObjectMapper objectMapper;
+    @Autowired
+    protected MockMvc mockMvc;
 
-    @Autowired protected WorldRepository worldRepository;
-    @Autowired protected CharacterRepository characterRepository;
-    @Autowired protected CharacterRelationshipRepository characterRelationshipRepository;
-    @Autowired protected EventRepository eventRepository;
-    @Autowired protected EventCharacterRepository eventCharacterRepository;
-    @Autowired protected FactionRepository factionRepository;
-    @Autowired protected FactionLocationRepository factionLocationRepository;
-    @Autowired protected LocationRepository locationRepository;
-    @Autowired protected CharacterLocationRepository characterLocationRepository;
-    @Autowired protected LoreRepository loreRepository;
-    @Autowired protected UserRepository userRepository;
+    @Autowired
+    protected ObjectMapper objectMapper;
 
-    @Autowired protected JwtEncoder jwtEncoder;
+    @Autowired
+    protected EntityManager entityManager;
 
-    private String jwtToken;
+    @Autowired
+    protected WorldRepository worldRepository;
 
-    @BeforeEach
-    void setupAuth() {
-        // Load the test user inserted via SQL
-        User user = userRepository.findByUsername("testuser")
-                .orElseThrow(() -> new IllegalStateException("Test user not found in SQL fixture"));
+    @Autowired
+    protected CharacterRepository characterRepository;
 
-        // Build JWT claims
+    @Autowired
+    protected UserRepository userRepository;
+
+    @Autowired
+    protected JwtEncoder jwtEncoder;
+
+    protected User testUser() {
+        return userRepository.findByUsername("testuser")
+                .orElseThrow();
+    }
+
+    protected User otherUser() {
+        return userRepository.findByUsername("otheruser")
+                .orElseThrow();
+    }
+
+    protected String createJwtToken(User user) {
+        var now = Instant.now();
+
         var claims = builder()
                 .issuer("worldbuilder-test")
                 .subject(user.getId().toString())
                 .claim("username", user.getUsername())
-                .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusSeconds(3600))
+                .issuedAt(now)
+                .expiresAt(now.plusSeconds(3600))
                 .build();
 
-        // Build JWT header (Spring Security 6+)
         var headers = JwsHeader.with(() -> "RS256").build();
 
-        // Encode JWT
-        var params = JwtEncoderParameters.from(headers, claims);
-        jwtToken = jwtEncoder.encode(params).getTokenValue();
-
+        return jwtEncoder
+                .encode(JwtEncoderParameters.from(headers, claims))
+                .getTokenValue();
     }
 
     protected MvcResult getRequest(String url) throws Exception {
         return mockMvc.perform(
-                get(url)
-                        .header("Authorization", "Bearer " + jwtToken)
-                        .header("X-Correlation-Id", UUID.randomUUID().toString())
-                        .contentType(APPLICATION_JSON)
-                        .accept(APPLICATION_JSON)
+                authenticated(get(url), testUser())
+        ).andReturn();
+    }
+
+    protected MvcResult getUnauthenticatedRequest(String url) throws Exception {
+        return mockMvc.perform(
+                unauthenticated(get(url))
         ).andReturn();
     }
 
     protected MvcResult postRequest(String url, Object body) throws Exception {
-        String json = objectMapper.writeValueAsString(body);
         return mockMvc.perform(
-                post(url)
-                        .header("Authorization", "Bearer " + jwtToken)
-                        .header("X-Correlation-Id", UUID.randomUUID().toString())
-                        .contentType(APPLICATION_JSON)
-                        .accept(APPLICATION_JSON)
-                        .content(json)
+                authenticated(post(url), testUser())
+                        .content(objectMapper.writeValueAsString(body))
         ).andReturn();
     }
 
     protected MvcResult putRequest(String url, Object body) throws Exception {
-        String json = objectMapper.writeValueAsString(body);
         return mockMvc.perform(
-                put(url)
-                        .header("Authorization", "Bearer " + jwtToken)
-                        .header("X-Correlation-Id", UUID.randomUUID().toString())
-                        .contentType(APPLICATION_JSON)
-                        .accept(APPLICATION_JSON)
-                        .content(json)
+                authenticated(put(url), testUser())
+                        .content(objectMapper.writeValueAsString(body))
         ).andReturn();
     }
 
     protected MvcResult deleteRequest(String url) throws Exception {
         return mockMvc.perform(
-                delete(url)
-                        .header("Authorization", "Bearer " + jwtToken)
-                        .header("X-Correlation-Id", UUID.randomUUID().toString())
-                        .contentType(APPLICATION_JSON)
-                        .accept(APPLICATION_JSON)
+                authenticated(delete(url), testUser())
         ).andReturn();
+    }
+
+    private MockHttpServletRequestBuilder authenticated(
+            MockHttpServletRequestBuilder request,
+            User user
+    ) {
+        return request
+                .header("Authorization", "Bearer " + createJwtToken(user))
+                .header("X-Correlation-Id", UUID.randomUUID().toString())
+                .contentType(APPLICATION_JSON)
+                .accept(APPLICATION_JSON);
+    }
+
+    private MockHttpServletRequestBuilder unauthenticated(
+            MockHttpServletRequestBuilder request
+    ) {
+        return request
+                .header("X-Correlation-Id", UUID.randomUUID().toString())
+                .contentType(APPLICATION_JSON)
+                .accept(APPLICATION_JSON);
     }
 }
