@@ -5,6 +5,10 @@ import { deleteWorld } from "@/actions/worldActions";
 import { BackLink } from "@/components/ui/back-link";
 import { World } from "@/types/World";
 import { Character } from "@/types/Character";
+import { Location } from "@/types/Location";
+import { Faction } from "@/types/Faction";
+import { Event } from "@/types/Event";
+import { LoreEntry } from "@/types/LoreEntry";
 import {
   Card,
   CardContent,
@@ -27,21 +31,24 @@ import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
+// Helper for singular/plural labels
+function label(count: number, singular: string, plural: string) {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
 export default async function WorldPage({ params }: any) {
   const { worldId } = await params;
 
-  // Read token on the server
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value ?? null;
 
-  // Fetch world + characters using serverClient
   const world: World = await serverClient.get(`/worlds/${worldId}`, token);
-  const characters: Character[] = await serverClient.get(
-    `/worlds/${worldId}/characters`,
-    token
-  );
+  const characters: Character[] = await serverClient.get(`/worlds/${worldId}/characters`, token);
+  const locations: Location[] = await serverClient.get(`/worlds/${worldId}/locations`, token);
+  const factions: Faction[] = await serverClient.get(`/worlds/${worldId}/factions`, token);
+  const events: Event[] = await serverClient.get(`/worlds/${worldId}/events`, token);
+  const lore: LoreEntry[] = await serverClient.get(`/worlds/${worldId}/lore`, token);
 
-  // Server action for delete
   const handleDelete = async () => {
     "use server";
     await deleteWorld(worldId);
@@ -49,11 +56,36 @@ export default async function WorldPage({ params }: any) {
   };
 
   const contentSections = [
-    { name: "Characters", slug: "characters", description: "Create and manage characters in your world." },
-    { name: "Locations", slug: "locations", description: "Define places, regions, and landmarks." },
-    { name: "Factions", slug: "factions", description: "Organisations, kingdoms, guilds, and groups." },
-    { name: "Events", slug: "events", description: "Battles, discoveries, meetings, prophecies." },
-    { name: "Lore Entries", slug: "lore-entries", description: "Write lore, history, myths, and world notes." },
+    {
+      name: "Characters",
+      slug: "characters",
+      description: "Create and manage characters in your world.",
+      label: label(characters.length, "Character", "Characters"),
+    },
+    {
+      name: "Locations",
+      slug: "locations",
+      description: "Define places, regions, and landmarks.",
+      label: label(locations.length, "Location", "Locations"),
+    },
+    {
+      name: "Factions",
+      slug: "factions",
+      description: "Organisations, kingdoms, guilds, and groups.",
+      label: label(factions.length, "Faction", "Factions"),
+    },
+    {
+      name: "Events",
+      slug: "events",
+      description: "Battles, discoveries, meetings, prophecies.",
+      label: label(events.length, "Event", "Events"),
+    },
+    {
+      name: "Lore Entries",
+      slug: "lore-entries",
+      description: "Write lore, history, myths, and world notes.",
+      label: label(lore.length, "Lore Entry", "Lore Entries"),
+    },
   ];
 
   const relationshipSections = [
@@ -85,11 +117,7 @@ export default async function WorldPage({ params }: any) {
 
         {/* ACTIONS */}
         <div className="flex shrink-0 gap-3">
-          <Button
-            asChild
-            variant="outline"
-            className="px-6 py-3 text-sm font-semibold"
-          >
+          <Button asChild variant="outline" className="px-6 py-3 text-sm font-semibold">
             <Link href={`/worlds/${worldId}/edit`}>Edit world</Link>
           </Button>
 
@@ -113,10 +141,7 @@ export default async function WorldPage({ params }: any) {
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
 
                 <form action={handleDelete}>
-                  <Button
-                    type="submit"
-                    className="bg-red-600 text-white hover:bg-red-600 cursor-pointer"
-                  >
+                  <Button type="submit" className="bg-red-600 text-white hover:bg-red-600 cursor-pointer">
                     Delete
                   </Button>
                 </form>
@@ -141,8 +166,9 @@ export default async function WorldPage({ params }: any) {
                   <CardDescription>{section.description}</CardDescription>
                 </CardHeader>
 
-                <CardContent>
-                  <p className="text-sm text-muted-foreground transition-colors group-hover:text-foreground">
+                <CardContent className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">{section.label}</p>
+                  <p className="text-sm text-muted-foreground group-hover:text-foreground">
                     Open →
                   </p>
                 </CardContent>
@@ -167,8 +193,8 @@ export default async function WorldPage({ params }: any) {
                   <CardDescription>{section.description}</CardDescription>
                 </CardHeader>
 
-                <CardContent>
-                  <p className="text-sm text-muted-foreground transition-colors group-hover:text-foreground">
+                <CardContent className="flex items-center justify-end">
+                  <p className="text-sm text-muted-foreground group-hover:text-foreground">
                     Open →
                   </p>
                 </CardContent>

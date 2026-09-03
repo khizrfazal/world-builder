@@ -23,7 +23,7 @@ public class LoreController {
 
     private final LoreService loreService;
 
-    @PostMapping("/worlds/{worldId}/lores")
+    @PostMapping("/worlds/{worldId}/lore")
     public ResponseEntity<UUID> createLore(
             @PathVariable UUID worldId,
             @Valid @RequestBody LoreRequest request
@@ -32,19 +32,19 @@ public class LoreController {
         return ResponseEntity.status(HttpStatus.CREATED).body(id);
     }
 
-    @GetMapping("/worlds/{worldId}/lores")
+    @GetMapping("/worlds/{worldId}/lore")
     public ResponseEntity<List<LoreResponse>> getLores(
             @PathVariable UUID worldId
     ) {
         return ResponseEntity.ok(loreService.getLores(worldId));
     }
 
-    @GetMapping("/lores/{id}")
+    @GetMapping("/lore/{id}")
     public ResponseEntity<LoreResponse> getLoreById(@PathVariable UUID id) {
         return ResponseEntity.ok(loreService.getLoreById(id));
     }
 
-    @PutMapping("/lores/{id}")
+    @PutMapping("/lore/{id}")
     public ResponseEntity<Void> updateLore(
             @PathVariable UUID id,
             @Valid @RequestBody LoreRequest request
@@ -53,7 +53,7 @@ public class LoreController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/lores/{id}")
+    @DeleteMapping("/lore/{id}")
     public ResponseEntity<Void> deleteLore(@PathVariable UUID id) {
         loreService.deleteLore(id);
         return ResponseEntity.noContent().build();

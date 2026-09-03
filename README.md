@@ -120,7 +120,7 @@ World
 - [x] Events
 - [x] Lore
 - [ ] Backend integration tests
-- [ ] Authentication
+- [x] Authentication
 - [ ] Frontend tests
 - [ ] Search & filtering
 - [ ] Image uploads
