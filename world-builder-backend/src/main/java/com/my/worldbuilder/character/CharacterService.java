@@ -30,25 +30,20 @@ public class CharacterService {
     public UUID createCharacter(UUID worldId, CharacterRequest request, UUID userId) {
         var world = worldRepository.findById(worldId)
                 .orElseThrow(() -> new RuntimeException("World does not exist"));
-
         if (!world.getUser().getId().equals(userId)) {
             throw new ForbiddenException("Not your world");
         }
-
         var characterEntity = characterMapper.toEntity(request);
         characterEntity.setWorld(world);
-
         return characterRepository.save(characterEntity).getId();
     }
 
     public List<CharacterResponse> getCharactersByWorld(UUID worldId, UUID userId) {
         var world = worldRepository.findById(worldId)
                 .orElseThrow(() -> new RuntimeException("World does not exist"));
-
         if (!world.getUser().getId().equals(userId)) {
             throw new ForbiddenException("Not your world");
         }
-
         return characterRepository.findByWorld_Id(worldId)
                 .stream()
                 .map(characterMapper::toResponse)
@@ -58,9 +53,7 @@ public class CharacterService {
     public CharacterResponse getCharacterById(UUID id, UUID userId) {
         var characterEntity = characterRepository.findById(id)
                 .orElseThrow(() -> new CharacterNotFoundException(id));
-
         assertOwnership(characterEntity, userId);
-
         return characterMapper.toResponse(characterEntity);
     }
 
@@ -68,9 +61,7 @@ public class CharacterService {
     public void updateCharacter(UUID id, CharacterRequest request, UUID userId) {
         var characterEntity = characterRepository.findById(id)
                 .orElseThrow(() -> new CharacterNotFoundException(id));
-
         assertOwnership(characterEntity, userId);
-
         characterMapper.updateEntity(characterEntity, request);
     }
 
@@ -78,9 +69,7 @@ public class CharacterService {
     public void deleteCharacter(UUID id, UUID userId) {
         var characterEntity = characterRepository.findById(id)
                 .orElseThrow(() -> new CharacterNotFoundException(id));
-
         assertOwnership(characterEntity, userId);
-
         characterRepository.delete(characterEntity);
     }
 }

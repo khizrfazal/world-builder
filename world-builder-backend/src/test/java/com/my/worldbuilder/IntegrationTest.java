@@ -3,6 +3,7 @@ package com.my.worldbuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.my.worldbuilder.character.CharacterRepository;
 import com.my.worldbuilder.common.exception.GlobalExceptionHandler;
+import com.my.worldbuilder.event.EventRepository;
 import com.my.worldbuilder.user.User;
 import com.my.worldbuilder.user.UserRepository;
 import com.my.worldbuilder.world.WorldRepository;
@@ -35,7 +36,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
         scripts = {
                 "classpath:sql/users_data.sql",
                 "classpath:sql/worlds_data.sql",
-                "classpath:sql/characters_data.sql"
+                "classpath:sql/characters_data.sql",
+                "classpath:sql/events_data.sql"
         },
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
@@ -55,6 +57,9 @@ public abstract class IntegrationTest {
 
     @Autowired
     protected CharacterRepository characterRepository;
+
+    @Autowired
+    protected EventRepository eventRepository;
 
     @Autowired
     protected UserRepository userRepository;
