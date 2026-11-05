@@ -51,24 +51,21 @@ public class CharacterService {
     }
 
     public CharacterResponse getCharacterById(UUID id, UUID userId) {
-        var characterEntity = characterRepository.findById(id)
-                .orElseThrow(() -> new CharacterNotFoundException(id));
+        var characterEntity = characterRepository.findById(id).orElseThrow(() -> new CharacterNotFoundException(id));
         assertOwnership(characterEntity, userId);
         return characterMapper.toResponse(characterEntity);
     }
 
     @Transactional
     public void updateCharacter(UUID id, CharacterRequest request, UUID userId) {
-        var characterEntity = characterRepository.findById(id)
-                .orElseThrow(() -> new CharacterNotFoundException(id));
+        var characterEntity = characterRepository.findById(id).orElseThrow(() -> new CharacterNotFoundException(id));
         assertOwnership(characterEntity, userId);
         characterMapper.updateEntity(characterEntity, request);
     }
 
     @Transactional
     public void deleteCharacter(UUID id, UUID userId) {
-        var characterEntity = characterRepository.findById(id)
-                .orElseThrow(() -> new CharacterNotFoundException(id));
+        var characterEntity = characterRepository.findById(id).orElseThrow(() -> new CharacterNotFoundException(id));
         assertOwnership(characterEntity, userId);
         characterRepository.delete(characterEntity);
     }

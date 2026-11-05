@@ -12,7 +12,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CharacterResponse {
     private UUID id;
-    private UUID worldId;
     private String name;
     private String summary;
     private LocalDateTime createdAt;

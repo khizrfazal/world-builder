@@ -19,15 +19,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CharacterControllerTest extends IntegrationTest {
 
     private static final String REQUEST_MAPPING = "/worlds";
-
-    private static final UUID MURIM_ID =
-            UUID.fromString("11111111-1111-1111-1111-111111111111");
-
-    private static final UUID JIN_MU_WON_ID =
-            UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
-
-    private static final UUID SEO_HAE_RANG_ID =
-            UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+    private static final UUID MURIM_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    private static final UUID JIN_MU_WON_ID = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+    private static final UUID SEO_HAE_RANG_ID = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
 
     @Nested
     class GetCharactersTests {
@@ -37,17 +31,13 @@ public class CharacterControllerTest extends IntegrationTest {
 
             @Test
             void thenReturnOnlyCharactersOwnedByUserWith200StatusCode() throws Exception {
-                MvcResult result =
-                        getRequest(REQUEST_MAPPING + "/" + MURIM_ID + "/characters");
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.OK.value());
-
+                MvcResult result = getRequest(REQUEST_MAPPING + "/" + MURIM_ID + "/characters");
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
                 List<CharacterResponse> body = objectMapper.readValue(
                         result.getResponse().getContentAsString(),
                         new TypeReference<>() {}
                 );
-
+                assertThat(result.getResponse().getContentAsString()).doesNotContain("worldId");
                 assertThat(body)
                         .hasSize(2)
                         .extracting(CharacterResponse::getName)
@@ -67,21 +57,16 @@ public class CharacterControllerTest extends IntegrationTest {
 
             @Test
             void thenReturnCharacterWith200StatusCode() throws Exception {
-                MvcResult result =
-                        getRequest("/characters/" + JIN_MU_WON_ID);
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.OK.value());
-
+                MvcResult result = getRequest("/characters/" + JIN_MU_WON_ID);
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
                 CharacterResponse body = objectMapper.readValue(
                         result.getResponse().getContentAsString(),
                         CharacterResponse.class
                 );
-
                 assertThat(body.getId()).isEqualTo(JIN_MU_WON_ID);
                 assertThat(body.getName()).isEqualTo("Jin Mu-Won");
-                assertThat(body.getSummary())
-                        .isEqualTo("Young master of the Northern Heavenly Sect");
+                assertThat(body.getSummary()).isEqualTo("Young master of the Northern Heavenly Sect");
+                assertThat(result.getResponse().getContentAsString()).doesNotContain("worldId");
             }
         }
 
@@ -91,12 +76,8 @@ public class CharacterControllerTest extends IntegrationTest {
             @Test
             void thenReturn404StatusCode() throws Exception {
                 UUID id = UUID.randomUUID();
-
-                MvcResult result =
-                        getRequest("/characters/" + id);
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.NOT_FOUND.value());
+                MvcResult result = getRequest("/characters/" + id);
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
             }
         }
 
@@ -105,9 +86,7 @@ public class CharacterControllerTest extends IntegrationTest {
 
             @Test
             void thenReturn403StatusCode() throws Exception {
-                User otherUser =
-                        userRepository.findByUsername("otheruser").orElseThrow();
-
+                User otherUser = userRepository.findByUsername("otheruser").orElseThrow();
                 World otherWorld = worldRepository.save(
                         World.builder()
                                 .title("Forbidden Character World")
@@ -115,7 +94,6 @@ public class CharacterControllerTest extends IntegrationTest {
                                 .user(otherUser)
                                 .build()
                 );
-
                 Character forbiddenCharacter = characterRepository.save(
                         Character.builder()
                                 .name("Forbidden Hero")
@@ -123,12 +101,8 @@ public class CharacterControllerTest extends IntegrationTest {
                                 .world(otherWorld)
                                 .build()
                 );
-
-                MvcResult result =
-                        getRequest("/characters/" + forbiddenCharacter.getId());
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.FORBIDDEN.value());
+                MvcResult result = getRequest("/characters/" + forbiddenCharacter.getId());
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value());
             }
         }
     }
@@ -145,31 +119,13 @@ public class CharacterControllerTest extends IntegrationTest {
                         "New Hero",
                         "A brave new character"
                 );
-
-                MvcResult result = postRequest(
-                        REQUEST_MAPPING + "/" + MURIM_ID + "/characters",
-                        request
-                );
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.CREATED.value());
-
-                UUID id = objectMapper.readValue(
-                        result.getResponse().getContentAsString(),
-                        UUID.class
-                );
-
-                Character character =
-                        characterRepository.findById(id).orElseThrow();
-
-                assertThat(character.getName())
-                        .isEqualTo("New Hero");
-
-                assertThat(character.getSummary())
-                        .isEqualTo("A brave new character");
-
-                assertThat(character.getWorld().getId())
-                        .isEqualTo(MURIM_ID);
+                MvcResult result = postRequest(REQUEST_MAPPING + "/" + MURIM_ID + "/characters", request);
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.CREATED.value());
+                UUID id = objectMapper.readValue(result.getResponse().getContentAsString(), UUID.class);
+                Character character = characterRepository.findById(id).orElseThrow();
+                assertThat(character.getName()).isEqualTo("New Hero");
+                assertThat(character.getSummary()).isEqualTo("A brave new character");
+                assertThat(character.getWorld().getId()).isEqualTo(MURIM_ID);
             }
         }
 
@@ -179,20 +135,10 @@ public class CharacterControllerTest extends IntegrationTest {
             @Test
             void thenReturn400WhenFieldsAreBlank() throws Exception {
                 long before = characterRepository.count();
-
-                CharacterRequest request =
-                        new CharacterRequest("", "");
-
-                MvcResult result = postRequest(
-                        REQUEST_MAPPING + "/" + MURIM_ID + "/characters",
-                        request
-                );
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.BAD_REQUEST.value());
-
-                assertThat(characterRepository.count())
-                        .isEqualTo(before);
+                CharacterRequest request = new CharacterRequest("", "");
+                MvcResult result = postRequest(REQUEST_MAPPING + "/" + MURIM_ID + "/characters", request);
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+                assertThat(characterRepository.count()).isEqualTo(before);
             }
         }
     }
@@ -205,25 +151,12 @@ public class CharacterControllerTest extends IntegrationTest {
 
             @Test
             void thenUpdateCharacterAndReturn204StatusCode() throws Exception {
-                CharacterRequest request = new CharacterRequest(
-                        "Updated Name",
-                        "Updated Summary"
-                );
-
-                MvcResult result =
-                        putRequest("/characters/" + SEO_HAE_RANG_ID, request);
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.NO_CONTENT.value());
-
-                Character updated =
-                        characterRepository.findById(SEO_HAE_RANG_ID).orElseThrow();
-
-                assertThat(updated.getName())
-                        .isEqualTo("Updated Name");
-
-                assertThat(updated.getSummary())
-                        .isEqualTo("Updated Summary");
+                CharacterRequest request = new CharacterRequest("Updated Name", "Updated Summary");
+                MvcResult result = putRequest("/characters/" + SEO_HAE_RANG_ID, request);
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
+                Character updated = characterRepository.findById(SEO_HAE_RANG_ID).orElseThrow();
+                assertThat(updated.getName()).isEqualTo("Updated Name");
+                assertThat(updated.getSummary()).isEqualTo("Updated Summary");
             }
         }
 
@@ -232,29 +165,15 @@ public class CharacterControllerTest extends IntegrationTest {
 
             @Test
             void thenReturn400AndDoNotModifyCharacter() throws Exception {
-                Character before =
-                        characterRepository.findById(SEO_HAE_RANG_ID).orElseThrow();
-
+                Character before = characterRepository.findById(SEO_HAE_RANG_ID).orElseThrow();
                 String originalName = before.getName();
                 String originalSummary = before.getSummary();
-
-                CharacterRequest request =
-                        new CharacterRequest("", "");
-
-                MvcResult result =
-                        putRequest("/characters/" + SEO_HAE_RANG_ID, request);
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.BAD_REQUEST.value());
-
-                Character after =
-                        characterRepository.findById(SEO_HAE_RANG_ID).orElseThrow();
-
-                assertThat(after.getName())
-                        .isEqualTo(originalName);
-
-                assertThat(after.getSummary())
-                        .isEqualTo(originalSummary);
+                CharacterRequest request = new CharacterRequest("", "");
+                MvcResult result = putRequest("/characters/" + SEO_HAE_RANG_ID, request);
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+                Character after = characterRepository.findById(SEO_HAE_RANG_ID).orElseThrow();
+                assertThat(after.getName()).isEqualTo(originalName);
+                assertThat(after.getSummary()).isEqualTo(originalSummary);
             }
         }
 
@@ -264,17 +183,9 @@ public class CharacterControllerTest extends IntegrationTest {
             @Test
             void thenReturn404StatusCode() throws Exception {
                 UUID id = UUID.randomUUID();
-
-                CharacterRequest request = new CharacterRequest(
-                        "Updated Name",
-                        "Updated Summary"
-                );
-
-                MvcResult result =
-                        putRequest("/characters/" + id, request);
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.NOT_FOUND.value());
+                CharacterRequest request = new CharacterRequest("Updated Name", "Updated Summary");
+                MvcResult result = putRequest("/characters/" + id, request);
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
             }
         }
 
@@ -283,9 +194,7 @@ public class CharacterControllerTest extends IntegrationTest {
 
             @Test
             void thenReturn403StatusCode() throws Exception {
-                User otherUser =
-                        userRepository.findByUsername("otheruser").orElseThrow();
-
+                User otherUser = userRepository.findByUsername("otheruser").orElseThrow();
                 World otherWorld = worldRepository.save(
                         World.builder()
                                 .title("Forbidden Update World")
@@ -301,29 +210,14 @@ public class CharacterControllerTest extends IntegrationTest {
                                 .world(otherWorld)
                                 .build()
                 );
-
-                CharacterRequest request =
-                        new CharacterRequest("New Name", "New Summary");
-
-                MvcResult result =
-                        putRequest(
-                                "/characters/" + forbiddenCharacter.getId(),
-                                request
-                        );
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.FORBIDDEN.value());
-
-                Character unchanged =
-                        characterRepository
+                CharacterRequest request = new CharacterRequest("New Name", "New Summary");
+                MvcResult result = putRequest("/characters/" + forbiddenCharacter.getId(), request);
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value());
+                Character unchanged = characterRepository
                                 .findById(forbiddenCharacter.getId())
                                 .orElseThrow();
-
-                assertThat(unchanged.getName())
-                        .isEqualTo("Original Name");
-
-                assertThat(unchanged.getSummary())
-                        .isEqualTo("Original Summary");
+                assertThat(unchanged.getName()).isEqualTo("Original Name");
+                assertThat(unchanged.getSummary()).isEqualTo("Original Summary");
             }
         }
     }
@@ -336,17 +230,10 @@ public class CharacterControllerTest extends IntegrationTest {
 
             @Test
             void thenDeleteCharacterAndReturn204StatusCode() throws Exception {
-                Character character =
-                        characterRepository.findById(SEO_HAE_RANG_ID).orElseThrow();
-
-                MvcResult result =
-                        deleteRequest("/characters/" + character.getId());
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.NO_CONTENT.value());
-
-                assertThat(characterRepository.findById(character.getId()))
-                        .isEmpty();
+                Character character = characterRepository.findById(SEO_HAE_RANG_ID).orElseThrow();
+                MvcResult result = deleteRequest("/characters/" + character.getId());
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
+                assertThat(characterRepository.findById(character.getId())).isEmpty();
             }
         }
 
@@ -356,12 +243,8 @@ public class CharacterControllerTest extends IntegrationTest {
             @Test
             void thenReturn404StatusCode() throws Exception {
                 UUID id = UUID.randomUUID();
-
-                MvcResult result =
-                        deleteRequest("/characters/" + id);
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.NOT_FOUND.value());
+                MvcResult result = deleteRequest("/characters/" + id);
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
             }
         }
 
@@ -370,9 +253,7 @@ public class CharacterControllerTest extends IntegrationTest {
 
             @Test
             void thenReturn403StatusCode() throws Exception {
-                User otherUser =
-                        userRepository.findByUsername("otheruser").orElseThrow();
-
+                User otherUser = userRepository.findByUsername("otheruser").orElseThrow();
                 World otherWorld = worldRepository.save(
                         World.builder()
                                 .title("Forbidden Delete World")
@@ -389,15 +270,9 @@ public class CharacterControllerTest extends IntegrationTest {
                                 .build()
                 );
 
-                MvcResult result =
-                        deleteRequest("/characters/" + forbiddenCharacter.getId());
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.FORBIDDEN.value());
-
-                assertThat(
-                        characterRepository.findById(forbiddenCharacter.getId())
-                ).isPresent();
+                MvcResult result = deleteRequest("/characters/" + forbiddenCharacter.getId());
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value());
+                assertThat(characterRepository.findById(forbiddenCharacter.getId())).isPresent();
             }
         }
     }
