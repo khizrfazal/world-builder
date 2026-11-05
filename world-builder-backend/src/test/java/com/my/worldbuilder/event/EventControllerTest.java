@@ -85,9 +85,7 @@ public class EventControllerTest extends IntegrationTest {
 
             @Test
             void thenReturn403StatusCode() throws Exception {
-                User otherUser =
-                        userRepository.findByUsername("otheruser").orElseThrow();
-
+                User otherUser = userRepository.findByUsername("otheruser").orElseThrow();
                 World otherWorld = worldRepository.save(
                         World.builder()
                                 .title("Forbidden Event World")
@@ -95,7 +93,6 @@ public class EventControllerTest extends IntegrationTest {
                                 .user(otherUser)
                                 .build()
                 );
-
                 Event forbiddenEvent = eventRepository.save(
                         Event.builder()
                                 .title("Forbidden Event")
@@ -105,12 +102,8 @@ public class EventControllerTest extends IntegrationTest {
                                 .world(otherWorld)
                                 .build()
                 );
-
-                MvcResult result =
-                        getRequest("/events/" + forbiddenEvent.getId());
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.FORBIDDEN.value());
+                MvcResult result = getRequest("/events/" + forbiddenEvent.getId());
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value());
             }
         }
     }
@@ -129,37 +122,18 @@ public class EventControllerTest extends IntegrationTest {
                         LocalDate.of(2026, 5, 10),
                         EventType.BATTLE
                 );
-
-                MvcResult result = postRequest(
-                        REQUEST_MAPPING + "/" + MURIM_ID + "/events",
-                        request
-                );
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.CREATED.value());
-
+                MvcResult result = postRequest(REQUEST_MAPPING + "/" + MURIM_ID + "/events", request);
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.CREATED.value());
                 UUID id = objectMapper.readValue(
                         result.getResponse().getContentAsString(),
                         UUID.class
                 );
-
-                Event event =
-                        eventRepository.findById(id).orElseThrow();
-
-                assertThat(event.getTitle())
-                        .isEqualTo("New Battle");
-
-                assertThat(event.getDescription())
-                        .isEqualTo("A new battle begins");
-
-                assertThat(event.getDate())
-                        .isEqualTo(LocalDate.of(2026, 5, 10));
-
-                assertThat(event.getType())
-                        .isEqualTo(EventType.BATTLE);
-
-                assertThat(event.getWorld().getId())
-                        .isEqualTo(MURIM_ID);
+                Event event = eventRepository.findById(id).orElseThrow();
+                assertThat(event.getTitle()).isEqualTo("New Battle");
+                assertThat(event.getDescription()).isEqualTo("A new battle begins");
+                assertThat(event.getDate()).isEqualTo(LocalDate.of(2026, 5, 10));
+                assertThat(event.getType()).isEqualTo(EventType.BATTLE);
+                assertThat(event.getWorld().getId()).isEqualTo(MURIM_ID);
             }
         }
 
@@ -175,10 +149,7 @@ public class EventControllerTest extends IntegrationTest {
                         LocalDate.of(2026, 5, 10),
                         EventType.BATTLE
                 );
-                MvcResult result = postRequest(
-                        REQUEST_MAPPING + "/" + MURIM_ID + "/events",
-                        request
-                );
+                MvcResult result = postRequest(REQUEST_MAPPING + "/" + MURIM_ID + "/events", request);
                 assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
                 assertThat(eventRepository.count()).isEqualTo(before);
             }
@@ -207,9 +178,7 @@ public class EventControllerTest extends IntegrationTest {
 
             @Test
             void thenReturn403StatusCode() throws Exception {
-                User otherUser =
-                        userRepository.findByUsername("otheruser").orElseThrow();
-
+                User otherUser = userRepository.findByUsername("otheruser").orElseThrow();
                 World otherWorld = worldRepository.save(
                         World.builder()
                                 .title("Another User's World")
@@ -217,26 +186,16 @@ public class EventControllerTest extends IntegrationTest {
                                 .user(otherUser)
                                 .build()
                 );
-
                 EventRequest request = new EventRequest(
                         "Unauthorized Battle",
                         "Should not be created",
                         LocalDate.of(2026, 5, 10),
                         EventType.BATTLE
                 );
-
                 long before = eventRepository.count();
-
-                MvcResult result = postRequest(
-                        REQUEST_MAPPING + "/" + otherWorld.getId() + "/events",
-                        request
-                );
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.FORBIDDEN.value());
-
-                assertThat(eventRepository.count())
-                        .isEqualTo(before);
+                MvcResult result = postRequest(REQUEST_MAPPING + "/" + otherWorld.getId() + "/events", request);
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value());
+                assertThat(eventRepository.count()).isEqualTo(before);
             }
         }
     }
@@ -255,27 +214,13 @@ public class EventControllerTest extends IntegrationTest {
                         LocalDate.of(2026, 6, 1),
                         EventType.MEETING
                 );
-
-                MvcResult result =
-                        putRequest("/events/" + COUNCIL_EVENT_ID, request);
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.NO_CONTENT.value());
-
-                Event updated =
-                        eventRepository.findById(COUNCIL_EVENT_ID).orElseThrow();
-
-                assertThat(updated.getTitle())
-                        .isEqualTo("Updated Event");
-
-                assertThat(updated.getDescription())
-                        .isEqualTo("Updated Description");
-
-                assertThat(updated.getDate())
-                        .isEqualTo(LocalDate.of(2026, 6, 1));
-
-                assertThat(updated.getType())
-                        .isEqualTo(EventType.MEETING);
+                MvcResult result = putRequest("/events/" + COUNCIL_EVENT_ID, request);
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
+                Event updated = eventRepository.findById(COUNCIL_EVENT_ID).orElseThrow();
+                assertThat(updated.getTitle()).isEqualTo("Updated Event");
+                assertThat(updated.getDescription()).isEqualTo("Updated Description");
+                assertThat(updated.getDate()).isEqualTo(LocalDate.of(2026, 6, 1));
+                assertThat(updated.getType()).isEqualTo(EventType.MEETING);
             }
         }
 
@@ -303,9 +248,7 @@ public class EventControllerTest extends IntegrationTest {
             @Test
             void thenReturn400WithValidationErrorsAndDoNotModifyEvent()
                     throws Exception {
-                Event before = eventRepository.findById(COUNCIL_EVENT_ID)
-                        .orElseThrow();
-
+                Event before = eventRepository.findById(COUNCIL_EVENT_ID).orElseThrow();
                 String originalTitle = before.getTitle();
                 String originalDescription = before.getDescription();
                 EventRequest request = new EventRequest(
@@ -321,8 +264,7 @@ public class EventControllerTest extends IntegrationTest {
                 assertThat(response)
                         .contains("Title must be less than 150 characters")
                         .contains("Description must be less than 5000 characters");
-                Event after = eventRepository.findById(COUNCIL_EVENT_ID)
-                        .orElseThrow();
+                Event after = eventRepository.findById(COUNCIL_EVENT_ID).orElseThrow();
                 assertThat(after.getTitle()).isEqualTo(originalTitle);
                 assertThat(after.getDescription()).isEqualTo(originalDescription);
             }
@@ -350,9 +292,7 @@ public class EventControllerTest extends IntegrationTest {
 
             @Test
             void thenReturn403StatusCode() throws Exception {
-                User otherUser =
-                        userRepository.findByUsername("otheruser").orElseThrow();
-
+                User otherUser = userRepository.findByUsername("otheruser").orElseThrow();
                 World otherWorld = worldRepository.save(
                         World.builder()
                                 .title("Forbidden Update World")
@@ -377,25 +317,11 @@ public class EventControllerTest extends IntegrationTest {
                         LocalDate.of(2026, 6, 1),
                         EventType.MEETING
                 );
-
-                MvcResult result =
-                        putRequest(
-                                "/events/" + forbiddenEvent.getId(),
-                                request
-                        );
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.FORBIDDEN.value());
-
-                Event unchanged =
-                        eventRepository.findById(forbiddenEvent.getId())
-                                .orElseThrow();
-
-                assertThat(unchanged.getTitle())
-                        .isEqualTo("Original Event");
-
-                assertThat(unchanged.getDescription())
-                        .isEqualTo("Original Description");
+                MvcResult result = putRequest("/events/" + forbiddenEvent.getId(), request);
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value());
+                Event unchanged = eventRepository.findById(forbiddenEvent.getId()).orElseThrow();
+                assertThat(unchanged.getTitle()).isEqualTo("Original Event");
+                assertThat(unchanged.getDescription()).isEqualTo("Original Description");
             }
         }
     }
@@ -408,17 +334,10 @@ public class EventControllerTest extends IntegrationTest {
 
             @Test
             void thenDeleteEventAndReturn204StatusCode() throws Exception {
-                Event event =
-                        eventRepository.findById(COUNCIL_EVENT_ID).orElseThrow();
-
-                MvcResult result =
-                        deleteRequest("/events/" + event.getId());
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.NO_CONTENT.value());
-
-                assertThat(eventRepository.findById(event.getId()))
-                        .isEmpty();
+                Event event = eventRepository.findById(COUNCIL_EVENT_ID).orElseThrow();
+                MvcResult result = deleteRequest("/events/" + event.getId());
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
+                assertThat(eventRepository.findById(event.getId())).isEmpty();
             }
         }
 
@@ -429,8 +348,7 @@ public class EventControllerTest extends IntegrationTest {
             void thenReturn404StatusCode() throws Exception {
                 UUID id = UUID.randomUUID();
                 MvcResult result = deleteRequest("/events/" + id);
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.NOT_FOUND.value());
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
             }
         }
 
@@ -439,9 +357,7 @@ public class EventControllerTest extends IntegrationTest {
 
             @Test
             void thenReturn403StatusCode() throws Exception {
-                User otherUser =
-                        userRepository.findByUsername("otheruser").orElseThrow();
-
+                User otherUser = userRepository.findByUsername("otheruser").orElseThrow();
                 World otherWorld = worldRepository.save(
                         World.builder()
                                 .title("Forbidden Delete World")
@@ -459,16 +375,9 @@ public class EventControllerTest extends IntegrationTest {
                                 .world(otherWorld)
                                 .build()
                 );
-
-                MvcResult result =
-                        deleteRequest("/events/" + forbiddenEvent.getId());
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.FORBIDDEN.value());
-
-                assertThat(
-                        eventRepository.findById(forbiddenEvent.getId())
-                ).isPresent();
+                MvcResult result = deleteRequest("/events/" + forbiddenEvent.getId());
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value());
+                assertThat(eventRepository.findById(forbiddenEvent.getId())).isPresent();
             }
         }
     }
