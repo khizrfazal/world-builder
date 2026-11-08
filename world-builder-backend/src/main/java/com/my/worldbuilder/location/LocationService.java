@@ -1,11 +1,10 @@
+
 package com.my.worldbuilder.location;
 
-import com.my.worldbuilder.common.exception.ForbiddenException;
 import com.my.worldbuilder.common.exception.LocationNotFoundException;
-import com.my.worldbuilder.common.exception.WorldNotFoundException;
+import com.my.worldbuilder.common.security.WorldOwnershipService;
 import com.my.worldbuilder.location.dto.LocationRequest;
 import com.my.worldbuilder.location.dto.LocationResponse;
-import com.my.worldbuilder.world.WorldRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,20 +18,11 @@ public class LocationService {
 
     private final LocationRepository locationRepository;
     private final LocationMapper locationMapper;
-    private final WorldRepository worldRepository;
-
-    private void assertOwnership(Location location, UUID userId) {
-        if (!location.getWorld().getUser().getId().equals(userId)) {
-            throw new ForbiddenException("Not your location");
-        }
-    }
+    private final WorldOwnershipService worldOwnershipService;
 
     @Transactional
     public UUID createLocation(UUID worldId, LocationRequest request, UUID userId) {
-        var world = worldRepository.findById(worldId).orElseThrow(() -> new WorldNotFoundException(worldId));
-        if (!world.getUser().getId().equals(userId)) {
-            throw new ForbiddenException("Not your world");
-        }
+        var world = worldOwnershipService.getOwnedWorld(worldId, userId);
         var entity = locationMapper.toEntity(request);
         entity.setWorld(world);
         return locationRepository.save(entity).getId();
@@ -40,10 +30,7 @@ public class LocationService {
 
     @Transactional(readOnly = true)
     public List<LocationResponse> getLocationsByWorld(UUID worldId, UUID userId) {
-        var world = worldRepository.findById(worldId).orElseThrow(() -> new WorldNotFoundException(worldId));
-        if (!world.getUser().getId().equals(userId)) {
-            throw new ForbiddenException("Not your world");
-        }
+        worldOwnershipService.getOwnedWorld(worldId, userId);
         return locationRepository.findByWorld_Id(worldId)
                 .stream()
                 .map(locationMapper::toResponse)
@@ -53,21 +40,21 @@ public class LocationService {
     @Transactional(readOnly = true)
     public LocationResponse getLocationById(UUID id, UUID userId) {
         var entity = locationRepository.findById(id).orElseThrow(() -> new LocationNotFoundException(id));
-        assertOwnership(entity, userId);
+        worldOwnershipService.assertOwnership(entity.getWorld(), userId);
         return locationMapper.toResponse(entity);
     }
 
     @Transactional
     public void updateLocation(UUID id, LocationRequest request, UUID userId) {
         var entity = locationRepository.findById(id).orElseThrow(() -> new LocationNotFoundException(id));
-        assertOwnership(entity, userId);
+        worldOwnershipService.assertOwnership(entity.getWorld(), userId);
         locationMapper.updateEntityFromRequest(request, entity);
     }
 
     @Transactional
     public void deleteLocation(UUID id, UUID userId) {
         var entity = locationRepository.findById(id).orElseThrow(() -> new LocationNotFoundException(id));
-        assertOwnership(entity, userId);
+        worldOwnershipService.assertOwnership(entity.getWorld(), userId);
         locationRepository.delete(entity);
     }
 }
