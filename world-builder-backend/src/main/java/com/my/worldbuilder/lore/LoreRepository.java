@@ -8,5 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface LoreRepository extends JpaRepository<LoreEntry, UUID> {
-    List<LoreEntry> findByWorldId(UUID worldId);
+    List<LoreEntry> findByWorld_Id(UUID worldId);
 }

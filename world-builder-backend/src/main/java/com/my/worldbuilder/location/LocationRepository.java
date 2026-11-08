@@ -5,5 +5,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface LocationRepository extends JpaRepository<Location, UUID> {
-    List<Location> findByWorldId(UUID worldId);
+    List<Location> findByWorld_Id(UUID worldId);
 }

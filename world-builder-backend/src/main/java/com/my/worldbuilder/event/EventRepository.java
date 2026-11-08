@@ -6,5 +6,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface EventRepository extends JpaRepository<Event, UUID> {
-    List<Event> findByWorldId(UUID worldId);
+    List<Event> findByWorld_Id(UUID worldId);
 }

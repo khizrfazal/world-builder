@@ -49,12 +49,8 @@ public class WorldControllerTest extends IntegrationTest {
                                 .build()
                 );
 
-                MvcResult result =
-                        getRequest(REQUEST_MAPPING);
-
-                assertThat(result.getResponse().getStatus())
-                        .isEqualTo(HttpStatus.OK.value());
-
+                MvcResult result = getRequest(REQUEST_MAPPING);
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
                 List<WorldResponse> body = objectMapper.readValue(
                         result.getResponse().getContentAsString(),
                         new TypeReference<>() {}

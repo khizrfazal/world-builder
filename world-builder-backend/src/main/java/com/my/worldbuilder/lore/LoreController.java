@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,36 +28,50 @@ public class LoreController {
     @PostMapping("/worlds/{worldId}/lore")
     public ResponseEntity<UUID> createLore(
             @PathVariable UUID worldId,
+            @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody LoreRequest request
     ) {
-        var id = loreService.createLore(worldId, request);
+        UUID userId = UUID.fromString(jwt.getSubject());
+        var id = loreService.createLore(worldId, userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(id);
     }
 
     @GetMapping("/worlds/{worldId}/lore")
     public ResponseEntity<List<LoreResponse>> getLores(
-            @PathVariable UUID worldId
+            @PathVariable UUID worldId,
+            @AuthenticationPrincipal Jwt jwt
     ) {
-        return ResponseEntity.ok(loreService.getLores(worldId));
+        UUID userId = UUID.fromString(jwt.getSubject());
+        return ResponseEntity.ok(loreService.getLores(worldId, userId));
     }
 
     @GetMapping("/lore/{id}")
-    public ResponseEntity<LoreResponse> getLoreById(@PathVariable UUID id) {
-        return ResponseEntity.ok(loreService.getLoreById(id));
+    public ResponseEntity<LoreResponse> getLoreById(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        return ResponseEntity.ok(loreService.getLoreById(id, userId));
     }
 
     @PutMapping("/lore/{id}")
     public ResponseEntity<Void> updateLore(
             @PathVariable UUID id,
+            @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody LoreRequest request
     ) {
-        loreService.updateLore(id, request);
+        UUID userId = UUID.fromString(jwt.getSubject());
+        loreService.updateLore(id, userId, request);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/lore/{id}")
-    public ResponseEntity<Void> deleteLore(@PathVariable UUID id) {
-        loreService.deleteLore(id);
+    public ResponseEntity<Void> deleteLore(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        loreService.deleteLore(id, userId);
         return ResponseEntity.noContent().build();
     }
 }

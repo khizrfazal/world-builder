@@ -12,7 +12,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class LoreResponse {
     private UUID id;
-    private UUID worldId;
     private String title;
     private String body;
     private LocalDateTime createdAt;
